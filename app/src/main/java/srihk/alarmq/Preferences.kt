@@ -10,7 +10,7 @@ object Preferences {
     private const val KEY_IS_RUNNING = "isRunning"
     private const val KEY_STATE = "state"
 
-    fun setList(context: Context, list: SnapshotStateList<String>) {
+    fun setList(context: Context, list: SnapshotStateList<Int>) {
         val prefs = context.getSharedPreferences(PREFERENCES_NAME, ComponentActivity.MODE_PRIVATE)
         val editor = prefs.edit()
 
@@ -18,12 +18,14 @@ object Preferences {
         editor.apply()
     }
 
-    fun getList(context: Context): MutableList<String> {
+    fun getList(context: Context): MutableList<Int> {
         val prefs = context.getSharedPreferences(PREFERENCES_NAME, ComponentActivity.MODE_PRIVATE)
         val s = prefs.getString(KEY_SNOOZE_LIST, "")
-        val list = mutableListOf<String>()
+        val list = mutableListOf<Int>()
         if (s != null && s.isNotEmpty()) {
-            list.addAll(s.split(" ").toList())
+            for (elem in s.split(" ").toList()) {
+                list.add(elem.toInt())
+            }
         }
         return list
     }

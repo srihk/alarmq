@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SnoozeItem(
     name: String,
-    item: String,
+    item: Int,
     showDelete: Boolean,
     onDelete: () -> Unit,
     onEdit: () -> Unit,

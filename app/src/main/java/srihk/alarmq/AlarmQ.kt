@@ -25,7 +25,7 @@ class AlarmQ : BroadcastReceiver() {
                 state = (state + 1) % snoozeList.size
                 setAlarm(
                     context,
-                    snoozeList[state].toInt())
+                    snoozeList[state])
                 Preferences.setState(context, state)
                 return
             } else if (action.equals(Constants.STOP)) {

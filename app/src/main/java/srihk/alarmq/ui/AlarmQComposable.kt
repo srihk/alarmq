@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 @Composable
 fun AlarmQComposable(
     modifier: Modifier = Modifier,
-    items: SnapshotStateList<String>,
+    items: SnapshotStateList<Int>,
     isRunning: Boolean,
     state: Int,
     updatePrefs: () -> Unit,
@@ -43,7 +43,7 @@ fun AlarmQComposable(
                         },
                         onEdit = {
                             if (!isRunning) {
-                                text.value = items[index]
+                                text.value = items[index].toString()
                                 show.value = true
                                 edit.value = true
                                 editIndex.value = index
@@ -100,24 +100,20 @@ fun AlarmQComposable(
         },
         onItemAdd = {
             if (edit.value) {
-                items[editIndex.value] = text.value
+                items[editIndex.value] = text.value.toInt()
                 edit.value = false
             } else {
-                items.add(text.value)
+                items.add(text.value.toInt())
             }
             enableAdd.value = false
             updatePrefs()
         },
         onValueChange = {
             val itVal = it.toIntOrNull()
-            enableAdd.value = true
-            if (itVal != null && itVal >= 0  || it == "") {
+            if (itVal != null && itVal >= 0 || it == "") {
                 text.value = it
-                if (it == "") {
-                    enableAdd.value = false
-                }
-            } else {
-                enableAdd.value = false
             }
+
+            enableAdd.value = !(text.value == "" || text.value.toInt() == 0)
         })
 }

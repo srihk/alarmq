@@ -23,7 +23,7 @@ import srihk.alarmq.ui.theme.AlarmQTheme
 
 class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private val snoozeList = mutableStateListOf<String>()
+    private val snoozeList = mutableStateListOf<Int>()
     private val state = mutableStateOf(0)
     private val isRunning = mutableStateOf(false)
 
@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
                             } else { /* Start */
                                 alarmQ.setAlarm(
                                     this,
-                                    snoozeList[0].toInt()
+                                    snoozeList[0]
                                 )
                             }
                             isRunning.value = !isRunning.value
@@ -89,7 +89,7 @@ fun DefaultPreview() {
     AlarmQTheme {
         SnoozeItem(
             name = "hi",
-            item = "23",
+            item = 23,
             false,
             {},
             {},
