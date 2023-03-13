@@ -23,7 +23,7 @@ object Preferences {
         val s = prefs.getString(KEY_SNOOZE_LIST, "")
         val list = mutableListOf<Int>()
         if (s != null && s.isNotEmpty()) {
-            for (elem in s.split(" ").toList()) {
+            for (elem in s.split(" ")) {
                 list.add(elem.toInt())
             }
         }
