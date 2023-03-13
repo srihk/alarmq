@@ -35,7 +35,11 @@ class AlarmQ : BroadcastReceiver() {
             }
         }
 
-        context?.startService(ringtoneServiceIntent) /* Start Alarm */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context?.startForegroundService(ringtoneServiceIntent)
+        } else {
+            context?.startService(ringtoneServiceIntent)
+        } /* Start Alarm */
     }
 
     fun setAlarm(context: Context, minutes: Int) {
