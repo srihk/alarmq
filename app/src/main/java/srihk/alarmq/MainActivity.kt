@@ -1,6 +1,9 @@
 package srihk.alarmq
 
+import android.Manifest
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -53,17 +56,25 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
                             ).show()
                         }
                         else {
-                            if (isRunning.value) { /* Stop */
-                                alarmQ.removeAlarm(this)
-                            } else { /* Start */
-                                alarmQ.setAlarm(
-                                    this,
-                                    snoozeList[0]
-                                )
+                            if (
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                                PackageManager.PERMISSION_DENIED
+                            ) {
+                                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),0)
+                            } else {
+                                if (isRunning.value) { /* Stop */
+                                    alarmQ.removeAlarm(this)
+                                } else { /* Start */
+                                    alarmQ.setAlarm(
+                                        this,
+                                        snoozeList[0]
+                                    )
+                                }
+                                isRunning.value = !isRunning.value
+                                setIsRunning(this, isRunning = isRunning.value)
+                                setState(this, 0)
                             }
-                            isRunning.value = !isRunning.value
-                            setIsRunning(this, isRunning = isRunning.value)
-                            setState(this, 0)
                         }
                     }
                 )
