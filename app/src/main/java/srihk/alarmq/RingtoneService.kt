@@ -1,5 +1,6 @@
 package srihk.alarmq
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,10 +13,10 @@ import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import srihk.alarmq.Constants.NOTIFICATION_ID
 
 class RingtoneService : Service() {
     private var alarmRingtone: Ringtone? = null
-    private var notificationManager: NotificationManager? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -38,7 +39,7 @@ class RingtoneService : Service() {
             // TODO: Facilitate the user to set default alarm.
         }
 
-        notificationManager = this.getSystemService(NOTIFICATION_SERVICE)
+        val notificationManager: NotificationManager = this.getSystemService(NOTIFICATION_SERVICE)
                 as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -47,25 +48,24 @@ class RingtoneService : Service() {
                 Constants.NOTIFICATION_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_HIGH
             )
-            notificationManager?.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Toast.makeText(this, "Alarm Ringing!", Toast.LENGTH_SHORT).show()
         alarmRingtone?.play()
-        sendNotification(this)
+        startForeground(NOTIFICATION_ID, buildNotification(this))
         return START_STICKY
     }
 
     override fun onDestroy() {
         alarmRingtone?.stop()
-        notificationManager?.cancel(0)
         Toast.makeText(this, "Alarm Stopped", Toast.LENGTH_SHORT).show()
         super.onDestroy()
     }
 
-    private fun sendNotification(context: Context) {
+    private fun buildNotification(context: Context): Notification {
         val snoozeIntent = Intent(context, AlarmQ::class.java).putExtra(
             Constants.ACTION,
             Constants.SNOOZE
@@ -106,6 +106,6 @@ class RingtoneService : Service() {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)
 
-        notificationManager?.notify(0, builder.build())
+        return builder.build()
     }
 }

@@ -6,4 +6,5 @@ object Constants {
     const val SNOOZE = "SNOOZE"
     const val STOP = "STOP"
     const val ACTION = "ACTION"
+    const val NOTIFICATION_ID = 1
 }
