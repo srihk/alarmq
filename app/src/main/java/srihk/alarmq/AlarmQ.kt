@@ -68,7 +68,7 @@ class AlarmQ : BroadcastReceiver() {
         alarmManager.setAlarmClock(info, pendingIntent)
         Toast.makeText(
             context,
-            "Alarm set for $minutes from now: ${SimpleDateFormat.getDateTimeInstance().format(time)}.",
+            "Alarm set for $minutes minutes from now: ${SimpleDateFormat.getDateTimeInstance().format(time)}.",
             Toast.LENGTH_LONG
         ).show()
     }
