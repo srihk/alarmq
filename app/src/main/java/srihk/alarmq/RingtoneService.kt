@@ -7,16 +7,22 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import srihk.alarmq.Constants.NOTIFICATION_ID
 
 class RingtoneService : Service() {
     private var alarmRingtone: Ringtone? = null
+    private var mediaPlayer: MediaPlayer? = null
+    private val handler: Handler = Handler(Looper.getMainLooper())
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -29,6 +35,8 @@ class RingtoneService : Service() {
             this,
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
         )
+
+        mediaPlayer = MediaPlayer.create(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
 
         if (alarmRingtone == null) {
             Toast.makeText(
@@ -52,15 +60,32 @@ class RingtoneService : Service() {
         }
     }
 
+    private val timeout = { Preferences.setIsRunning(this, false); stopSelf() }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        handler.postDelayed(timeout, 5 * 60000)
         Toast.makeText(this, "Alarm Ringing!", Toast.LENGTH_SHORT).show()
-        alarmRingtone?.play()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            alarmRingtone?.isLooping = true
+            alarmRingtone?.play()
+        } else {
+            mediaPlayer?.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build())
+            mediaPlayer?.isLooping = true
+            mediaPlayer?.start()
+        }
+
         startForeground(NOTIFICATION_ID, buildNotification(this))
         return START_STICKY
     }
 
     override fun onDestroy() {
-        alarmRingtone?.stop()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            alarmRingtone?.stop()
+        } else {
+            mediaPlayer?.stop()
+        }
+        handler.removeCallbacksAndMessages(null)
         Toast.makeText(this, "Alarm Stopped", Toast.LENGTH_SHORT).show()
         super.onDestroy()
     }
