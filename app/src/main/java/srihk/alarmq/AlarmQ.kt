@@ -66,9 +66,11 @@ class AlarmQ : BroadcastReceiver() {
         )
         val info: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(time, pendingIntent)
         alarmManager.setAlarmClock(info, pendingIntent)
+        val nextAlarm = SimpleDateFormat.getDateTimeInstance().format(time)
+        Preferences.setNextAlarm(context, nextAlarm)
         Toast.makeText(
             context,
-            "Alarm set for $minutes minutes from now: ${SimpleDateFormat.getDateTimeInstance().format(time)}.",
+            "Alarm set for $minutes minutes from now: ${nextAlarm}.",
             Toast.LENGTH_LONG
         ).show()
     }

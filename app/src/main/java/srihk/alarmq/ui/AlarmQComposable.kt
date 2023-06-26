@@ -18,6 +18,7 @@ fun AlarmQComposable(
     items: SnapshotStateList<Int>,
     isRunning: Boolean,
     state: Int,
+    nextAlarm: String,
     updatePrefs: () -> Unit,
     onStart: () -> Unit
 ) {
@@ -72,6 +73,9 @@ fun AlarmQComposable(
                         }
                     }
                 }
+            }
+            if (isRunning) {
+                Text("Next Alarm: $nextAlarm")
             }
             Button(
                 onClick = onStart,

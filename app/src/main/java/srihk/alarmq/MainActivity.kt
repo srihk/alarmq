@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import srihk.alarmq.Preferences.PREFERENCES_NAME
 import srihk.alarmq.Preferences.getIsRunning
 import srihk.alarmq.Preferences.getList
+import srihk.alarmq.Preferences.getNextAlarm
 import srihk.alarmq.Preferences.getState
 import srihk.alarmq.Preferences.setIsRunning
 import srihk.alarmq.Preferences.setList
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
     private val snoozeList = mutableStateListOf<Int>()
     private val state = mutableStateOf(0)
     private val isRunning = mutableStateOf(false)
+    private val nextAlarm = mutableStateOf("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
             .registerOnSharedPreferenceChangeListener(this)
         state.value = getState(this)
         isRunning.value = getIsRunning(this)
+        nextAlarm.value = getNextAlarm(this)
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
@@ -45,6 +48,7 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
                     snoozeList,
                     isRunning = isRunning.value,
                     state = state.value,
+                    nextAlarm = nextAlarm.value,
                     updatePrefs = {
                         setList(this, snoozeList)
                     },
@@ -85,6 +89,7 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         state.value = getState(this)
         isRunning.value = getIsRunning(this)
+        nextAlarm.value = getNextAlarm(this)
     }
 
     override fun onDestroy() {

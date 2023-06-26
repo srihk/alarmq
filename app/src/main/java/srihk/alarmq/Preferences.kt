@@ -9,6 +9,7 @@ object Preferences {
     private const val KEY_SNOOZE_LIST = "snoozeList"
     private const val KEY_IS_RUNNING = "isRunning"
     private const val KEY_STATE = "state"
+    private const val KEY_NEXT_ALARM ="nextAlarm"
 
     fun setList(context: Context, list: SnapshotStateList<Int>) {
         val prefs = context.getSharedPreferences(PREFERENCES_NAME, ComponentActivity.MODE_PRIVATE)
@@ -51,6 +52,18 @@ object Preferences {
         val prefs = context.getSharedPreferences(PREFERENCES_NAME, ComponentActivity.MODE_PRIVATE)
         val editor = prefs.edit()
         editor.putInt(KEY_STATE, state)
+        editor.apply()
+    }
+
+    fun getNextAlarm(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFERENCES_NAME, ComponentActivity.MODE_PRIVATE)
+        return prefs.getString(KEY_NEXT_ALARM, "") ?: return ""
+    }
+
+    fun setNextAlarm(context: Context, nextAlarm: String) {
+        val prefs = context.getSharedPreferences(PREFERENCES_NAME, ComponentActivity.MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putString(KEY_NEXT_ALARM, nextAlarm)
         editor.apply()
     }
 }
