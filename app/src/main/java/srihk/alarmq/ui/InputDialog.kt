@@ -6,7 +6,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
+
+const val MINUTES_TEXT_FIELD_TAG = "MinutesTextFieldTag"
 
 @Composable
 fun InputDialog(
@@ -43,6 +47,7 @@ fun InputDialog(
             text = {
                 OutlinedTextField(
                     value = text,
+                    modifier = Modifier.testTag(MINUTES_TEXT_FIELD_TAG),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     label = { Text("Minutes") },
