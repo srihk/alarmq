@@ -15,6 +15,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
+import android.os.PowerManager.WakeLock
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import srihk.alarmq.Constants.NOTIFICATION_ID
@@ -23,6 +25,7 @@ class RingtoneService : Service() {
     private var alarmRingtone: Ringtone? = null
     private var mediaPlayer: MediaPlayer? = null
     private val handler: Handler = Handler(Looper.getMainLooper())
+    private var wake:WakeLock? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -37,6 +40,8 @@ class RingtoneService : Service() {
         )
 
         mediaPlayer = MediaPlayer.create(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+
+        wake = getWakeLock()
 
         if (alarmRingtone == null) {
             Toast.makeText(
@@ -75,6 +80,7 @@ class RingtoneService : Service() {
             mediaPlayer?.start()
         }
 
+        wake?.acquire(300000)
         startForeground(NOTIFICATION_ID, buildNotification(this))
         return START_STICKY
     }
@@ -86,6 +92,7 @@ class RingtoneService : Service() {
             mediaPlayer?.stop()
         }
         handler.removeCallbacksAndMessages(null)
+        wake?.release()
         Toast.makeText(this, "Alarm Stopped", Toast.LENGTH_SHORT).show()
         super.onDestroy()
     }
@@ -132,5 +139,19 @@ class RingtoneService : Service() {
             .setOngoing(true)
 
         return builder.build()
+    }
+
+    private fun getWakeLock(): WakeLock {
+        val powerManager = applicationContext.getSystemService(POWER_SERVICE) as PowerManager
+
+        val wakeLockTag = packageName + "WAKELOCK"
+        val wakeLock = powerManager.newWakeLock(
+            PowerManager.FULL_WAKE_LOCK
+                    or PowerManager.ACQUIRE_CAUSES_WAKEUP
+                    or PowerManager.ON_AFTER_RELEASE,
+            wakeLockTag
+        )
+
+        return wakeLock
     }
 }
