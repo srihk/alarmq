@@ -6,11 +6,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import srihk.alarmq.AlarmQViewModel
 
 @Composable
 fun AlarmQComposable(
@@ -20,8 +24,10 @@ fun AlarmQComposable(
     state: Int,
     nextAlarm: String,
     updatePrefs: () -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    viewModel: AlarmQViewModel = viewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val show = rememberSaveable { mutableStateOf(false) }
     val edit = rememberSaveable { mutableStateOf(false) }
     val text = rememberSaveable { mutableStateOf("") }
@@ -75,7 +81,7 @@ fun AlarmQComposable(
                 }
             }
             if (isRunning) {
-                Text("Next Alarm: $nextAlarm")
+                Text("Next Alarm: ${uiState.nextAlarmScheduledTime}")
             }
             Button(
                 onClick = onStart,
