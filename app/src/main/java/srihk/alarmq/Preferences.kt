@@ -11,7 +11,7 @@ object Preferences {
     private const val KEY_STATE = "state"
     private const val KEY_NEXT_ALARM ="nextAlarm"
 
-    fun setList(context: Context, list: SnapshotStateList<Int>) {
+    fun setList(context: Context, list: List<Int>) {
         val prefs = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 

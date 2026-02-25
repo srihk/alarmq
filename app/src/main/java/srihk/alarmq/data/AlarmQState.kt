@@ -1,6 +1,6 @@
 package srihk.alarmq.data
 
-data class AlarmQUiState(
+data class AlarmQState(
     val isActive: Boolean = false,
     val intervalQueueContents: List<Int> = emptyList(),
     val currentInterval: Int? = null,
