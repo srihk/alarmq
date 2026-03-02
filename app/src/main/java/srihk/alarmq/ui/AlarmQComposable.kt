@@ -25,7 +25,7 @@ fun AlarmQComposable(
     nextAlarm: String,
     updatePrefs: () -> Unit,
     onStart: () -> Unit,
-    viewModel: AlarmQViewModel = viewModel(),
+    viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val show = rememberSaveable { mutableStateOf(false) }

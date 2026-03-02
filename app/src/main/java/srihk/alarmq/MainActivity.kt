@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -25,22 +26,23 @@ import srihk.alarmq.ui.AlarmQComposable
 import srihk.alarmq.ui.SnoozeItem
 import srihk.alarmq.ui.theme.AlarmQTheme
 
-class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
+class MainActivity : ComponentActivity() {
 
     private val snoozeList = mutableStateListOf<Int>()
     private val state = mutableStateOf(0)
     private val isRunning = mutableStateOf(false)
     private val nextAlarm = mutableStateOf("")
 
+    private val viewModel: AlarmQViewModel by viewModels { AlarmQViewModel.Factory }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        snoozeList.addAll(getList(this))
         val alarmQ = AlarmQ()
-        getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE)
-            .registerOnSharedPreferenceChangeListener(this)
-        state.value = getState(this)
-        isRunning.value = getIsRunning(this)
-        nextAlarm.value = getNextAlarm(this)
+        val alarmQState = viewModel.uiState
+        snoozeList.addAll(alarmQState.value.intervalQueueContents)
+        state.value = alarmQState.value.currentInterval?:0
+        isRunning.value = alarmQState.value.isActive
+        nextAlarm.value = alarmQState.value.nextAlarmScheduledTime?:"hey!"
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
@@ -50,7 +52,14 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
                     state = state.value,
                     nextAlarm = nextAlarm.value,
                     updatePrefs = {
-                        setList(this, snoozeList)
+                        viewModel.saveState(
+                            alarmQState.value.copy(
+                                isActive = alarmQState.value.isActive,
+                                intervalQueueContents = snoozeList,
+                                currentInterval = alarmQState.value.currentInterval,
+                                nextAlarmScheduledTime = alarmQState.value.nextAlarmScheduledTime
+                            )
+                        )
                     },
                     onStart = {
                         if (snoozeList.size == 0) {
@@ -76,26 +85,20 @@ class MainActivity : ComponentActivity(), SharedPreferences.OnSharedPreferenceCh
                                     )
                                 }
                                 isRunning.value = !isRunning.value
-                                setIsRunning(this, isRunning = isRunning.value)
-                                setState(this, 0)
+                                viewModel.saveState(
+                                    alarmQState.value.copy(
+                                        isActive = isRunning.value,
+                                        intervalQueueContents = snoozeList,
+                                        currentInterval = 0,
+                                        nextAlarmScheduledTime = alarmQState.value.nextAlarmScheduledTime
+                                    )
+                                )
                             }
                         }
                     }
                 )
             }
         }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        state.value = getState(this)
-        isRunning.value = getIsRunning(this)
-        nextAlarm.value = getNextAlarm(this)
-    }
-
-    override fun onDestroy() {
-        getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE)
-            .unregisterOnSharedPreferenceChangeListener(this)
-        super.onDestroy()
     }
 }
 
