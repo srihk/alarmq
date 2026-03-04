@@ -32,6 +32,9 @@ class MainActivity : ComponentActivity() {
     private val state = mutableStateOf(0)
     private val isRunning = mutableStateOf(false)
     private val nextAlarm = mutableStateOf("")
+    private val messageDisplayer by lazy {
+        (application as AlarmQApplication).messageDisplayer
+    }
 
     private val viewModel: AlarmQViewModel by viewModels { AlarmQViewModel.Factory }
 
@@ -63,10 +66,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onStart = {
                         if (snoozeList.size == 0) {
-                            Toast.makeText(this,
-                                "Add at least one snooze item in the queue.",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            messageDisplayer.showLong("Add at least one snooze item in the queue.")
                         }
                         else {
                             if (
@@ -77,11 +77,12 @@ class MainActivity : ComponentActivity() {
                                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),0)
                             } else {
                                 if (isRunning.value) { /* Stop */
-                                    alarmQ.removeAlarm(this)
+                                    alarmQ.removeAlarm(this, messageDisplayer)
                                 } else { /* Start */
                                     alarmQ.setAlarm(
                                         this,
-                                        snoozeList[0]
+                                        snoozeList[0],
+                                        messageDisplayer
                                     )
                                 }
                                 isRunning.value = !isRunning.value

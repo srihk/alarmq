@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.widget.Toast
 import java.text.SimpleDateFormat
 
 class AlarmQ : BroadcastReceiver() {
@@ -16,6 +15,7 @@ class AlarmQ : BroadcastReceiver() {
         val ringtoneServiceIntent = Intent(context, RingtoneService::class.java)
 
         if (intent != null && context != null) {
+            val messageDisplayer = (context.applicationContext as AlarmQApplication).messageDisplayer
             val action = intent.getStringExtra(Constants.ACTION)
 
             if (action.equals(Constants.SNOOZE)) {
@@ -25,7 +25,9 @@ class AlarmQ : BroadcastReceiver() {
                 state = (state + 1) % snoozeList.size
                 setAlarm(
                     context,
-                    snoozeList[state])
+                    snoozeList[state],
+                    messageDisplayer
+                )
                 Preferences.setState(context, state)
                 return
             } else if (action.equals(Constants.STOP)) {
@@ -42,16 +44,12 @@ class AlarmQ : BroadcastReceiver() {
         } /* Start Alarm */
     }
 
-    fun setAlarm(context: Context, minutes: Int) {
+    fun setAlarm(context: Context, minutes: Int, messageDisplayer: MessageDisplayer) {
         val time: Long = System.currentTimeMillis() + minutes * 60000
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                Toast.makeText(
-                    context,
-                    "Please give AlarmQ the permission 'Allow setting alarms and remainders'.",
-                    Toast.LENGTH_LONG
-                ).show()
+                messageDisplayer.showLong("Please give AlarmQ the permission 'Allow setting alarms and remainders'.")
                 return
             }
         }
@@ -68,14 +66,10 @@ class AlarmQ : BroadcastReceiver() {
         alarmManager.setAlarmClock(info, pendingIntent)
         val nextAlarm = SimpleDateFormat.getDateTimeInstance().format(time)
         Preferences.setNextAlarm(context, nextAlarm)
-        Toast.makeText(
-            context,
-            "Alarm set for $minutes minutes from now: ${nextAlarm}.",
-            Toast.LENGTH_LONG
-        ).show()
+        messageDisplayer.showLong("Alarm set for $minutes minutes from now: ${nextAlarm}.")
     }
 
-    fun removeAlarm(context: Context) {
+    fun removeAlarm(context: Context, messageDisplayer: MessageDisplayer) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmQ::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
@@ -89,10 +83,6 @@ class AlarmQ : BroadcastReceiver() {
         val ringtoneServiceIntent = Intent(context, RingtoneService::class.java)
         context.stopService(ringtoneServiceIntent)
 
-        Toast.makeText(
-            context,
-            "Cleared alarms.",
-            Toast.LENGTH_LONG
-        ).show()
+        messageDisplayer.showLong("Cleared alarms.")
     }
 }

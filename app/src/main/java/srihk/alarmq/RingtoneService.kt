@@ -15,7 +15,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import srihk.alarmq.Constants.NOTIFICATION_ID
 
@@ -23,6 +22,8 @@ class RingtoneService : Service() {
     private var alarmRingtone: Ringtone? = null
     private var mediaPlayer: MediaPlayer? = null
     private val handler: Handler = Handler(Looper.getMainLooper())
+
+    private val messageDisplayer by lazy { (application as AlarmQApplication).messageDisplayer }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -39,11 +40,7 @@ class RingtoneService : Service() {
         mediaPlayer = MediaPlayer.create(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
 
         if (alarmRingtone == null) {
-            Toast.makeText(
-                this,
-                "Please set a default Alarm Ringtone.",
-                Toast.LENGTH_LONG
-            ).show()
+            messageDisplayer.showLong("Please set a default Alarm Ringtone.")
             // TODO: Facilitate the user to set default alarm.
         }
 
@@ -64,7 +61,7 @@ class RingtoneService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         handler.postDelayed(timeout, 5 * 60000)
-        Toast.makeText(this, "Alarm Ringing!", Toast.LENGTH_SHORT).show()
+        messageDisplayer.showShort("Alarm Ringing!")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             alarmRingtone?.isLooping = true
@@ -86,7 +83,7 @@ class RingtoneService : Service() {
             mediaPlayer?.stop()
         }
         handler.removeCallbacksAndMessages(null)
-        Toast.makeText(this, "Alarm Stopped", Toast.LENGTH_SHORT).show()
+        messageDisplayer.showShort("Alarm Stopped")
         super.onDestroy()
     }
 
