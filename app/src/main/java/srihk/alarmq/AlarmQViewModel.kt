@@ -6,10 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import srihk.alarmq.data.AlarmQState
 import srihk.alarmq.data.AlarmQStateRepository
 
@@ -21,6 +18,45 @@ class AlarmQViewModel(
 
     fun saveState(alarmQState: AlarmQState) {
         alarmQStateRepository.saveState(alarmQState)
+    }
+
+    fun deleteIntervalAtIndex(id: Int) {
+        val newState = uiState.value.copy(
+            isActive = uiState.value.isActive,
+            intervalQueueContents = uiState.value.intervalQueueContents.filterIndexed { index, _ -> index != id },
+            currentInterval = uiState.value.currentInterval,
+            nextAlarmScheduledTime = uiState.value.nextAlarmScheduledTime
+        )
+
+        alarmQStateRepository.saveState(newState)
+    }
+
+    fun addInterval(intervalDuration: Int) {
+        val newState = uiState.value.copy(
+            isActive = uiState.value.isActive,
+            intervalQueueContents = uiState.value.intervalQueueContents.plus(intervalDuration),
+            currentInterval = uiState.value.currentInterval,
+            nextAlarmScheduledTime = uiState.value.nextAlarmScheduledTime
+        )
+
+        alarmQStateRepository.saveState(newState)
+    }
+
+    fun editInterval(id: Int, newIntervalDuration: Int) {
+        val newState = uiState.value.copy(
+            isActive = uiState.value.isActive,
+            intervalQueueContents = uiState.value.intervalQueueContents.mapIndexed { index, value ->
+                if (index == id) {
+                    newIntervalDuration
+                } else {
+                    value
+                }
+            },
+            currentInterval = uiState.value.currentInterval,
+            nextAlarmScheduledTime = uiState.value.nextAlarmScheduledTime
+        )
+
+        alarmQStateRepository.saveState(newState)
     }
 
     companion object : ViewModelProvider.Factory {

@@ -1,11 +1,9 @@
 package srihk.alarmq
 
 import android.Manifest
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,24 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import srihk.alarmq.Preferences.PREFERENCES_NAME
-import srihk.alarmq.Preferences.getIsRunning
-import srihk.alarmq.Preferences.getList
-import srihk.alarmq.Preferences.getNextAlarm
-import srihk.alarmq.Preferences.getState
-import srihk.alarmq.Preferences.setIsRunning
-import srihk.alarmq.Preferences.setList
-import srihk.alarmq.Preferences.setState
 import srihk.alarmq.ui.AlarmQComposable
 import srihk.alarmq.ui.SnoozeItem
 import srihk.alarmq.ui.theme.AlarmQTheme
 
 class MainActivity : ComponentActivity() {
-
-    private val snoozeList = mutableStateListOf<Int>()
-    private val state = mutableStateOf(0)
-    private val isRunning = mutableStateOf(false)
-    private val nextAlarm = mutableStateOf("")
     private val messageDisplayer by lazy {
         (application as AlarmQApplication).messageDisplayer
     }
@@ -42,30 +27,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val alarmQ = AlarmQ()
         val alarmQState = viewModel.uiState
-        snoozeList.addAll(alarmQState.value.intervalQueueContents)
-        state.value = alarmQState.value.currentInterval?:0
-        isRunning.value = alarmQState.value.isActive
-        nextAlarm.value = alarmQState.value.nextAlarmScheduledTime?:"hey!"
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
                     modifier = Modifier.fillMaxSize(),
-                    snoozeList,
-                    isRunning = isRunning.value,
-                    state = state.value,
-                    nextAlarm = nextAlarm.value,
-                    updatePrefs = {
-                        viewModel.saveState(
-                            alarmQState.value.copy(
-                                isActive = alarmQState.value.isActive,
-                                intervalQueueContents = snoozeList,
-                                currentInterval = alarmQState.value.currentInterval,
-                                nextAlarmScheduledTime = alarmQState.value.nextAlarmScheduledTime
-                            )
-                        )
-                    },
                     onStart = {
-                        if (snoozeList.size == 0) {
+                        if (alarmQState.value.intervalQueueContents.isEmpty()) {
                             messageDisplayer.showLong("Add at least one snooze item in the queue.")
                         }
                         else {
@@ -76,20 +43,20 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),0)
                             } else {
-                                if (isRunning.value) { /* Stop */
+                                if (alarmQState.value.isActive) { /* Stop */
                                     alarmQ.removeAlarm(this, messageDisplayer)
                                 } else { /* Start */
                                     alarmQ.setAlarm(
                                         this,
-                                        snoozeList[0],
+                                        alarmQState.value.intervalQueueContents[0],
                                         messageDisplayer
                                     )
                                 }
-                                isRunning.value = !isRunning.value
+
                                 viewModel.saveState(
                                     alarmQState.value.copy(
-                                        isActive = isRunning.value,
-                                        intervalQueueContents = snoozeList,
+                                        isActive = !alarmQState.value.isActive,
+                                        intervalQueueContents = alarmQState.value.intervalQueueContents,
                                         currentInterval = 0,
                                         nextAlarmScheduledTime = alarmQState.value.nextAlarmScheduledTime
                                     )

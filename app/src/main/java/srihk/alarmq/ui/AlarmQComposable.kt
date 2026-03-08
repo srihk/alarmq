@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,11 +18,6 @@ import srihk.alarmq.AlarmQViewModel
 @Composable
 fun AlarmQComposable(
     modifier: Modifier = Modifier,
-    items: SnapshotStateList<Int>,
-    isRunning: Boolean,
-    state: Int,
-    nextAlarm: String,
-    updatePrefs: () -> Unit,
     onStart: () -> Unit,
     viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory),
 ) {
@@ -39,31 +33,30 @@ fun AlarmQComposable(
     ) {
         Column(modifier = modifier) {
             LazyColumn(Modifier.weight(1f)) {
-                itemsIndexed(items = items) { index, item ->
+                itemsIndexed(items = uiState.intervalQueueContents) { index, item ->
                     SnoozeItem(
                         name = index.toString(),
                         item = item,
-                        showDelete = !isRunning,
+                        showDelete = !uiState.isActive,
                         onDelete = {
-                            items.removeAt(index)
-                            updatePrefs()
+                            viewModel.deleteIntervalAtIndex(index)
                         },
                         onEdit = {
-                            if (!isRunning) {
-                                text.value = items[index].toString()
+                            if (!uiState.isActive) {
+                                text.value = uiState.intervalQueueContents[index].toString()
                                 show.value = true
                                 edit.value = true
                                 editIndex.value = index
                             }
                         },
-                        color = if (isRunning && index == state) {
+                        color = if (uiState.isActive && index == uiState.currentInterval) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.background
                         }
                     )
                 }
-                if (!isRunning) {
+                if (!uiState.isActive) {
                     item {
                         Button(
                             onClick = {
@@ -80,14 +73,14 @@ fun AlarmQComposable(
                     }
                 }
             }
-            if (isRunning) {
+            if (uiState.isActive) {
                 Text("Next Alarm: ${uiState.nextAlarmScheduledTime}")
             }
             Button(
                 onClick = onStart,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val startStopButtonText = if (isRunning) {
+                val startStopButtonText = if (uiState.isActive) {
                     "STOP"
                 } else {
                     "START"
@@ -110,13 +103,12 @@ fun AlarmQComposable(
         },
         onItemAdd = {
             if (edit.value) {
-                items[editIndex.value] = text.value.toInt()
+                viewModel.editInterval(editIndex.value, text.value.toInt())
                 edit.value = false
             } else {
-                items.add(text.value.toInt())
+                viewModel.addInterval(text.value.toInt())
             }
             enableAdd.value = false
-            updatePrefs()
         },
         onValueChange = {
             val itVal = it.toIntOrNull()
