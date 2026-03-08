@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import kotlinx.coroutines.flow.StateFlow
+import srihk.alarmq.data.AlarmQState
 import java.text.SimpleDateFormat
 
 class AlarmQ : BroadcastReceiver() {
@@ -16,22 +18,31 @@ class AlarmQ : BroadcastReceiver() {
 
         if (intent != null && context != null) {
             val messageDisplayer = (context.applicationContext as AlarmQApplication).messageDisplayer
+            val alarmQStateRepository = (context.applicationContext as AlarmQApplication).alarmQStateRepository
             val action = intent.getStringExtra(Constants.ACTION)
+            val alarmQState: StateFlow<AlarmQState> = alarmQStateRepository.stateFlow
 
             if (action.equals(Constants.SNOOZE)) {
                 context.stopService(ringtoneServiceIntent) /* Stop Alarm */
-                val snoozeList = Preferences.getList(context)
-                var state = Preferences.getState(context)
-                state = (state + 1) % snoozeList.size
+                val currentInterval = alarmQState.value.currentInterval
+                val nextInterval = if (currentInterval == null) 0 else ((currentInterval + 1) % alarmQState.value.intervalQueueContents.size)
                 setAlarm(
                     context,
-                    snoozeList[state],
+                    alarmQState.value.intervalQueueContents[nextInterval],
                     messageDisplayer
                 )
-                Preferences.setState(context, state)
+                alarmQStateRepository.saveState(
+                    alarmQState.value.copy(
+                        currentInterval = nextInterval
+                    )
+                )
                 return
             } else if (action.equals(Constants.STOP)) {
-                Preferences.setIsRunning(context, false)
+                alarmQStateRepository.saveState(
+                    alarmQState.value.copy(
+                        isActive = false
+                    )
+                )
                 context.stopService(ringtoneServiceIntent) /* Stop Alarm */
                 return
             }
