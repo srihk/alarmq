@@ -77,6 +77,7 @@ class AlarmQ : BroadcastReceiver() {
         val info: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(time, pendingIntent)
         alarmManager.setAlarmClock(info, pendingIntent)
         val nextAlarm = SimpleDateFormat.getDateTimeInstance().format(time)
+        alarmQStateRepository = (context.applicationContext as AlarmQApplication).alarmQStateRepository
         alarmQStateRepository.saveState(
             alarmQStateRepository.stateFlow.value.copy(
                 nextAlarmScheduledTime = nextAlarm
