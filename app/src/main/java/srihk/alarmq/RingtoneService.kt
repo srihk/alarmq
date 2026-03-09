@@ -24,6 +24,7 @@ class RingtoneService : Service() {
     private val handler: Handler = Handler(Looper.getMainLooper())
 
     private val messageDisplayer by lazy { (application as AlarmQApplication).messageDisplayer }
+    private val alarmQStateRepository by lazy { (application as AlarmQApplication).alarmQStateRepository }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -57,7 +58,14 @@ class RingtoneService : Service() {
         }
     }
 
-    private val timeout = { Preferences.setIsRunning(this, false); stopSelf() }
+    private val timeout = {
+        alarmQStateRepository.saveState(
+            alarmQStateRepository.stateFlow.value.copy(
+                isActive = false
+            )
+        )
+        stopSelf()
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         handler.postDelayed(timeout, 5 * 60000)

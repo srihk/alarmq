@@ -1,7 +1,6 @@
 package srihk.alarmq
 
 import android.app.Application
-import srihk.alarmq.Preferences.PREFERENCES_NAME
 import srihk.alarmq.data.AlarmQStateRepository
 import srihk.alarmq.data.LocalAlarmQDataSource
 
