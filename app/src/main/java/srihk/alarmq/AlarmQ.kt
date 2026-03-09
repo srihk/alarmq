@@ -8,17 +8,18 @@ import android.content.Intent
 import android.os.Build
 import kotlinx.coroutines.flow.StateFlow
 import srihk.alarmq.data.AlarmQState
+import srihk.alarmq.data.AlarmQStateRepository
 import java.text.SimpleDateFormat
 
 class AlarmQ : BroadcastReceiver() {
-
+    private lateinit var alarmQStateRepository: AlarmQStateRepository
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val ringtoneServiceIntent = Intent(context, RingtoneService::class.java)
 
         if (intent != null && context != null) {
             val messageDisplayer = (context.applicationContext as AlarmQApplication).messageDisplayer
-            val alarmQStateRepository = (context.applicationContext as AlarmQApplication).alarmQStateRepository
+            alarmQStateRepository = (context.applicationContext as AlarmQApplication).alarmQStateRepository
             val action = intent.getStringExtra(Constants.ACTION)
             val alarmQState: StateFlow<AlarmQState> = alarmQStateRepository.stateFlow
 
@@ -76,7 +77,12 @@ class AlarmQ : BroadcastReceiver() {
         val info: AlarmManager.AlarmClockInfo = AlarmManager.AlarmClockInfo(time, pendingIntent)
         alarmManager.setAlarmClock(info, pendingIntent)
         val nextAlarm = SimpleDateFormat.getDateTimeInstance().format(time)
-        Preferences.setNextAlarm(context, nextAlarm)
+        alarmQStateRepository.saveState(
+            alarmQStateRepository.stateFlow.value.copy(
+                nextAlarmScheduledTime = nextAlarm
+            )
+        )
+
         messageDisplayer.showLong("Alarm set for $minutes minutes from now: ${nextAlarm}.")
     }
 
