@@ -13,13 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import srihk.alarmq.AlarmQViewModel
+import srihk.alarmq.ui.AlarmQViewModel
 
 @Composable
 fun AlarmQComposable(
     modifier: Modifier = Modifier,
     onStart: () -> Unit,
-    viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory),
+    viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val show = rememberSaveable { mutableStateOf(false) }

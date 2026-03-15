@@ -1,6 +1,9 @@
-package srihk.alarmq
+package srihk.alarmq.domain
 
 import android.icu.text.SimpleDateFormat
+import srihk.alarmq.alarm.AlarmRinger
+import srihk.alarmq.alarm.AlarmScheduler
+import srihk.alarmq.feedback.MessageDisplayer
 import srihk.alarmq.data.AlarmQStateRepository
 
 class AlarmQManager(
@@ -9,7 +12,7 @@ class AlarmQManager(
     private val messageDisplayer: MessageDisplayer,
     private val alarmRinger: AlarmRinger
 ) {
-    private val alarmQStateFlow = alarmQStateRepository.stateFlow;
+    private val alarmQStateFlow = alarmQStateRepository.stateFlow
 
     private fun scheduleAlarmForInterval(currentInterval: Int = 0) {
         alarmRinger.stop()
@@ -25,12 +28,9 @@ class AlarmQManager(
             return
         }
 
-        alarmQStateRepository.saveState(
-            alarmQState.copy(
-                isActive = true,
-                currentInterval = currentInterval,
-                nextAlarmScheduledTime = SimpleDateFormat.getDateTimeInstance().format(time)
-            )
+        alarmQStateRepository.setActiveInterval(
+            currentInterval,
+            SimpleDateFormat.getDateTimeInstance().format(time)
         )
     }
 
@@ -39,16 +39,9 @@ class AlarmQManager(
     }
 
     fun stop() {
-        val alarmQState = alarmQStateFlow.value
         alarmScheduler.clearScheduledAlarms()
         alarmRinger.stop()
-        alarmQStateRepository.saveState(
-            alarmQState.copy(
-                isActive = false,
-                currentInterval = null,
-                nextAlarmScheduledTime = null
-            )
-        )
+        alarmQStateRepository.resetState()
     }
 
     fun scheduleNextAlarm() {

@@ -1,8 +1,9 @@
-package srihk.alarmq
+package srihk.alarmq.infrastructure
 
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import srihk.alarmq.alarm.AlarmRinger
 
 class AndroidRingtoneAlarmRinger(private val context: Context) : AlarmRinger {
     val ringtoneServiceIntent = Intent(context, RingtoneService::class.java)

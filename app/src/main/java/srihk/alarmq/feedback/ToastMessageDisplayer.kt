@@ -1,4 +1,4 @@
-package srihk.alarmq
+package srihk.alarmq.feedback
 
 import android.content.Context
 import android.widget.Toast

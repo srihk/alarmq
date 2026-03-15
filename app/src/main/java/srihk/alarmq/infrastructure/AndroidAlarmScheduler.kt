@@ -1,10 +1,14 @@
-package srihk.alarmq
+package srihk.alarmq.infrastructure
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import srihk.alarmq.alarm.AlarmScheduler
+import srihk.alarmq.app.AlarmQApplication
+import srihk.alarmq.feedback.MessageDisplayer
+import srihk.alarmq.receivers.AlarmReceiver
 
 class AndroidAlarmScheduler(private val context: Context) : AlarmScheduler {
 
@@ -19,7 +23,7 @@ class AndroidAlarmScheduler(private val context: Context) : AlarmScheduler {
             }
         }
 
-        val intent = Intent(context, AlarmQ::class.java)
+        val intent = Intent(context, AlarmReceiver::class.java)
             .putExtra("time", time)
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -35,7 +39,7 @@ class AndroidAlarmScheduler(private val context: Context) : AlarmScheduler {
     }
 
     override fun clearScheduledAlarms() {
-        val intent = Intent(context, AlarmQ::class.java)
+        val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             0,

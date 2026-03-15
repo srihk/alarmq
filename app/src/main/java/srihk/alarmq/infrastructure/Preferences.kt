@@ -1,8 +1,6 @@
-package srihk.alarmq
+package srihk.alarmq.infrastructure
 
 import android.content.Context
-import androidx.activity.ComponentActivity
-import androidx.compose.runtime.snapshots.SnapshotStateList
 
 object Preferences {
     const val PREFERENCES_NAME = "prefs"

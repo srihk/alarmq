@@ -1,4 +1,4 @@
-package srihk.alarmq
+package srihk.alarmq.infrastructure
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -16,7 +16,12 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
-import srihk.alarmq.Constants.NOTIFICATION_ID
+import srihk.alarmq.R
+import srihk.alarmq.app.Constants.NOTIFICATION_ID
+import srihk.alarmq.app.AlarmQApplication
+import srihk.alarmq.app.Constants
+import srihk.alarmq.receivers.NotificationActionReceiver
+import srihk.alarmq.ui.MainActivity
 
 class RingtoneService : Service() {
     private var alarmRingtone: Ringtone? = null
@@ -59,11 +64,7 @@ class RingtoneService : Service() {
     }
 
     private val timeout = {
-        alarmQStateRepository.saveState(
-            alarmQStateRepository.stateFlow.value.copy(
-                isActive = false
-            )
-        )
+        alarmQStateRepository.resetState()
         stopSelf()
     }
 
@@ -96,7 +97,7 @@ class RingtoneService : Service() {
     }
 
     private fun buildNotification(context: Context): Notification {
-        val snoozeIntent = Intent(context, AlarmQ::class.java).putExtra(
+        val snoozeIntent = Intent(context, NotificationActionReceiver::class.java).putExtra(
             Constants.ACTION,
             Constants.SNOOZE
         )
@@ -107,7 +108,7 @@ class RingtoneService : Service() {
             PendingIntent.FLAG_IMMUTABLE + PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val stopIntent = Intent(context, AlarmQ::class.java).putExtra(
+        val stopIntent = Intent(context, NotificationActionReceiver::class.java).putExtra(
             Constants.ACTION,
             Constants.STOP
         )

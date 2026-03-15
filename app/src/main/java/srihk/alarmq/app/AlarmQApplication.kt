@@ -1,6 +1,14 @@
-package srihk.alarmq
+package srihk.alarmq.app
 
 import android.app.Application
+import srihk.alarmq.domain.AlarmQEditor
+import srihk.alarmq.domain.AlarmQManager
+import srihk.alarmq.alarm.AlarmRinger
+import srihk.alarmq.alarm.AlarmScheduler
+import srihk.alarmq.infrastructure.AndroidAlarmScheduler
+import srihk.alarmq.infrastructure.AndroidRingtoneAlarmRinger
+import srihk.alarmq.feedback.MessageDisplayer
+import srihk.alarmq.feedback.ToastMessageDisplayer
 import srihk.alarmq.data.AlarmQStateRepository
 import srihk.alarmq.data.LocalAlarmQDataSource
 
@@ -19,6 +27,9 @@ class AlarmQApplication : Application() {
     lateinit var alarmQManager: AlarmQManager
         private set
 
+    lateinit var alarmQEditor: AlarmQEditor
+        private set
+
     override fun onCreate() {
         super.onCreate()
 
@@ -32,6 +43,9 @@ class AlarmQApplication : Application() {
             alarmQStateRepository,
             messageDisplayer,
             alarmRinger
+        )
+        alarmQEditor = AlarmQEditor(
+            alarmQStateRepository
         )
     }
 }

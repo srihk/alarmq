@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import srihk.alarmq.Preferences
-import srihk.alarmq.Preferences.PREFERENCES_NAME
+import srihk.alarmq.infrastructure.Preferences
+import srihk.alarmq.infrastructure.Preferences.PREFERENCES_NAME
 
 class LocalAlarmQDataSource(private val context: Context) : AlarmQDataSource, SharedPreferences.OnSharedPreferenceChangeListener {
 

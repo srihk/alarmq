@@ -1,4 +1,4 @@
-package srihk.alarmq
+package srihk.alarmq.alarm
 
 interface AlarmScheduler {
     fun scheduleAlarm(time: Long): Boolean

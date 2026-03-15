@@ -1,4 +1,4 @@
-package srihk.alarmq
+package srihk.alarmq.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -12,8 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import srihk.alarmq.ui.AlarmQComposable
-import srihk.alarmq.ui.SnoozeItem
+import srihk.alarmq.app.AlarmQApplication
 import srihk.alarmq.ui.theme.AlarmQTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,14 +24,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val alarmQ = AlarmQ()
-        val alarmQState = viewModel.uiState
+        val stateFlow = viewModel.uiState
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
                     modifier = Modifier.fillMaxSize(),
                     onStart = {
-                        if (alarmQState.value.intervalQueueContents.isEmpty()) {
+                        if (stateFlow.value.intervalQueueContents.isEmpty()) {
                             messageDisplayer.showLong("Add at least one snooze item in the queue.")
                         }
                         else {
@@ -43,24 +41,11 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),0)
                             } else {
-                                if (alarmQState.value.isActive) { /* Stop */
-                                    alarmQ.removeAlarm(this, messageDisplayer)
+                                if (stateFlow.value.isActive) { /* Stop */
+                                    viewModel.stopAlarmQ()
                                 } else { /* Start */
-                                    alarmQ.setAlarm(
-                                        this,
-                                        alarmQState.value.intervalQueueContents[0],
-                                        messageDisplayer
-                                    )
+                                    viewModel.startAlarmQ()
                                 }
-
-                                viewModel.saveState(
-                                    alarmQState.value.copy(
-                                        isActive = !alarmQState.value.isActive,
-                                        intervalQueueContents = alarmQState.value.intervalQueueContents,
-                                        currentInterval = 0,
-                                        nextAlarmScheduledTime = alarmQState.value.nextAlarmScheduledTime
-                                    )
-                                )
                             }
                         }
                     }

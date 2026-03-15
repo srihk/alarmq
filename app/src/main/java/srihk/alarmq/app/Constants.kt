@@ -1,4 +1,4 @@
-package srihk.alarmq
+package srihk.alarmq.app
 
 object Constants {
     const val NOTIFICATION_CHANNEL_ID = "AlarmQ"
