@@ -54,8 +54,8 @@ class AlarmQViewModel(
 
                 return AlarmQViewModel(
                     alarmQStateRepository = (application as AlarmQApplication).alarmQStateRepository,
-                    alarmQEditor = (application as AlarmQApplication).alarmQEditor,
-                    alarmQManager = (application as AlarmQApplication).alarmQManager,
+                    alarmQEditor = application.alarmQEditor,
+                    alarmQManager = application.alarmQManager,
                     savedStateHandle
                 ) as T
             }

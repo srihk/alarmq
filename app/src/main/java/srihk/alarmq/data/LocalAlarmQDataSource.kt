@@ -28,7 +28,7 @@ class LocalAlarmQDataSource(private val context: Context) : AlarmQDataSource, Sh
             Preferences.getNextAlarm(context)
         )
 
-        return state;
+        return state
     }
 
     override fun saveAlarmQState(state: AlarmQState) {
