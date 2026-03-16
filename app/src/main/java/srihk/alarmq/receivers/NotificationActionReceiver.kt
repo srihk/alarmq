@@ -13,7 +13,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             val alarmQManager = (context.applicationContext as AlarmQApplication)
                 .alarmQManager
 
-            if (action.equals(Constants.SNOOZE)) {
+            if (action.equals(Constants.NEXT)) {
                 alarmQManager.scheduleNextAlarm()
             } else if (action.equals(Constants.STOP)) {
                 alarmQManager.stop()

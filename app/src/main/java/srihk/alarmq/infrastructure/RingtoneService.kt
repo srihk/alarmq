@@ -99,7 +99,7 @@ class RingtoneService : Service() {
     private fun buildNotification(context: Context): Notification {
         val snoozeIntent = Intent(context, NotificationActionReceiver::class.java).putExtra(
             Constants.ACTION,
-            Constants.SNOOZE
+            Constants.NEXT
         )
         val snoozePendingIntent = PendingIntent.getBroadcast(
             context,
@@ -132,7 +132,7 @@ class RingtoneService : Service() {
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Alarm ringing!")
             .setContentIntent(openPendingIntent)
-            .addAction(R.drawable.ic_launcher_background, Constants.SNOOZE, snoozePendingIntent)
+            .addAction(R.drawable.ic_launcher_background, Constants.NEXT, snoozePendingIntent)
             .addAction(R.drawable.ic_launcher_foreground, Constants.STOP, stopPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setOngoing(true)
