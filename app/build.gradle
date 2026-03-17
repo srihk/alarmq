@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.compose'
+    id 'com.google.devtools.ksp' version '2.3.6'
 }
 
 android {
@@ -45,6 +46,7 @@ android {
 }
 
 dependencies {
+    def room_version = "2.8.4"
     implementation 'androidx.core:core-ktx:1.17.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
     implementation 'androidx.activity:activity-compose:1.12.4'
@@ -58,6 +60,14 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.59.2'
+    ksp 'com.google.dagger:dagger-compiler:2.59.2'
+
+    implementation "androidx.room:room-runtime:$room_version"
+
+    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
+    // See KSP Quickstart to add KSP to your build
+    ksp "androidx.room:room-compiler:$room_version"
 }
 java {
     toolchain {
