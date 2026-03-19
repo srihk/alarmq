@@ -1,44 +1,43 @@
 package srihk.alarmq.data
 
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import srihk.alarmq.infrastructure.Preferences
-import srihk.alarmq.infrastructure.Preferences.PREFERENCES_NAME
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import srihk.alarmq.data.mapper.toDomain
+import srihk.alarmq.data.mapper.toEntity
 
-class LocalAlarmQDataSource(private val context: Context) : AlarmQDataSource, SharedPreferences.OnSharedPreferenceChangeListener {
-
-    init {
-        context.getSharedPreferences(PREFERENCES_NAME, MODE_PRIVATE)
-            .registerOnSharedPreferenceChangeListener(this)
-    }
-
-    private val _stateFlow = MutableStateFlow(getAlarmQState())
-    override val stateFlow : StateFlow<AlarmQState> = _stateFlow.asStateFlow()
-
-    override fun getAlarmQState(): AlarmQState {
-        val state = AlarmQState(
-            Preferences.getIsRunning(context),
-            Preferences.getList(context),
-            Preferences.getState(context),
-            Preferences.getNextAlarm(context)
+class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource {
+    override val alarmQFlow : Flow<AlarmQState> = alarmQDao.getAlarmQState().map { stateEntity ->
+        AlarmQState(
+            stateEntity?.isActive ?: false,
+            stateEntity?.currentIntervalId,
+            stateEntity?.nextAlarmTime
         )
-
-        return state
     }
 
-    override fun saveAlarmQState(state: AlarmQState) {
-        Preferences.setIsRunning(context, state.isActive)
-        Preferences.setList(context, state.intervalQueueContents)
-        Preferences.setState(context, state.currentInterval ?: 0)
-        Preferences.setNextAlarm(context, state.nextAlarmScheduledTime ?: "")
+    override val intervalListFlow : Flow<List<Interval>> = alarmQDao.getIntervals()
+        .map { intervalEntities ->
+            intervalEntities.map { intervalEntity -> intervalEntity.toDomain() }
+        }
+
+    override suspend fun saveAlarmQState(state: AlarmQState) {
+        alarmQDao.setAlarmQState(
+            AlarmQStateEntity(
+                isActive = state.isActive,
+                currentIntervalId = state.currentInterval,
+                nextAlarmTime = state.nextAlarmTime
+            )
+        )
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        _stateFlow.update { getAlarmQState() }
+    override suspend fun insertInterval(interval: Interval) {
+        alarmQDao.insertInterval(interval.toEntity())
+    }
+
+    override suspend fun deleteInterval(interval: Interval) {
+        alarmQDao.deleteInterval(interval.toEntity())
+    }
+
+    override suspend fun updateInterval(interval: Interval) {
+        alarmQDao.updateInterval(interval.toEntity())
     }
 }
