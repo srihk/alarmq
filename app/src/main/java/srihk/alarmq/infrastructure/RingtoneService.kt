@@ -16,6 +16,10 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import srihk.alarmq.R
 import srihk.alarmq.app.Constants.NOTIFICATION_ID
 import srihk.alarmq.app.AlarmQApplication
@@ -30,6 +34,8 @@ class RingtoneService : Service() {
 
     private val messageDisplayer by lazy { (application as AlarmQApplication).messageDisplayer }
     private val alarmQStateRepository by lazy { (application as AlarmQApplication).alarmQStateRepository }
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -64,7 +70,9 @@ class RingtoneService : Service() {
     }
 
     private val timeout = {
-        alarmQStateRepository.resetState()
+        serviceScope.launch {
+            alarmQStateRepository.resetState()
+        }
         stopSelf()
     }
 

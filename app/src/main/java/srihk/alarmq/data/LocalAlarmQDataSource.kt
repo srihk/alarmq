@@ -6,12 +6,10 @@ import srihk.alarmq.data.mapper.toDomain
 import srihk.alarmq.data.mapper.toEntity
 
 class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource {
-    override val alarmQFlow : Flow<AlarmQState> = alarmQDao.getAlarmQState().map { stateEntity ->
-        AlarmQState(
-            stateEntity?.isActive ?: false,
-            stateEntity?.currentIntervalId,
-            stateEntity?.nextAlarmTime
-        )
+    private val defaultAlarmQStateEntity = AlarmQStateEntity(0, false, null, null);
+
+    override val alarmQFlow : Flow<AlarmQState> = alarmQDao.getAlarmQState().map {
+        alarmQStateEntity -> (alarmQStateEntity?:defaultAlarmQStateEntity).toDomain()
     }
 
     override val intervalListFlow : Flow<List<Interval>> = alarmQDao.getIntervals()
@@ -29,8 +27,8 @@ class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource
         )
     }
 
-    override suspend fun insertInterval(interval: Interval) {
-        alarmQDao.insertInterval(interval.toEntity())
+    override suspend fun insertInterval(duration: Int) {
+        alarmQDao.insertInterval(duration)
     }
 
     override suspend fun deleteInterval(interval: Interval) {
@@ -39,5 +37,15 @@ class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource
 
     override suspend fun updateInterval(interval: Interval) {
         alarmQDao.updateInterval(interval.toEntity())
+    }
+
+    override suspend fun getCurrentAlarmQState(): AlarmQState {
+        return (alarmQDao.getAlarmQStateOnce()?:defaultAlarmQStateEntity).toDomain()
+    }
+
+    override suspend fun getCurrentIntervalListState(): List<Interval> {
+        return alarmQDao.getIntervalsOnce().map { intervalEntity ->
+            intervalEntity.toDomain()
+        }
     }
 }

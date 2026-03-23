@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.text.SimpleDateFormat
 
 @Composable
 fun AlarmQComposable(
@@ -20,7 +21,8 @@ fun AlarmQComposable(
     onStart: () -> Unit,
     viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory)
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val alarmQState by viewModel.alarmQStateFlow.collectAsStateWithLifecycle()
+    val intervalListState by viewModel.intervalListStateFlow.collectAsStateWithLifecycle()
     val show = rememberSaveable { mutableStateOf(false) }
     val edit = rememberSaveable { mutableStateOf(false) }
     val text = rememberSaveable { mutableStateOf("") }
@@ -32,30 +34,30 @@ fun AlarmQComposable(
     ) {
         Column(modifier = modifier) {
             LazyColumn(Modifier.weight(1f)) {
-                itemsIndexed(items = uiState.intervalQueueContents) { index, item ->
+                itemsIndexed(items = intervalListState) { index, interval ->
                     SnoozeItem(
-                        name = index.toString(),
-                        item = item,
-                        showDelete = !uiState.isActive,
+                        name = interval.order.toString(),
+                        item = interval.duration,
+                        showDelete = !alarmQState.isActive,
                         onDelete = {
-                            viewModel.deleteIntervalAtIndex(index)
+                            viewModel.deleteInterval(interval)
                         },
                         onEdit = {
-                            if (!uiState.isActive) {
-                                text.value = uiState.intervalQueueContents[index].toString()
+                            if (!alarmQState.isActive) {
+                                text.value = intervalListState[index].toString()
                                 show.value = true
                                 edit.value = true
                                 editIndex.value = index
                             }
                         },
-                        color = if (uiState.isActive && index == uiState.currentInterval) {
+                        color = if (alarmQState.isActive && index == alarmQState.currentInterval) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.background
                         }
                     )
                 }
-                if (!uiState.isActive) {
+                if (!alarmQState.isActive) {
                     item {
                         Button(
                             onClick = {
@@ -72,14 +74,18 @@ fun AlarmQComposable(
                     }
                 }
             }
-            if (uiState.isActive) {
-                Text("Next Alarm: ${uiState.nextAlarmScheduledTime}")
+            if (alarmQState.isActive) {
+                Text("Next Alarm: ${
+                    SimpleDateFormat
+                    .getDateTimeInstance()
+                    .format(alarmQState.nextAlarmTime)
+                }")
             }
             Button(
                 onClick = onStart,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val startStopButtonText = if (uiState.isActive) {
+                val startStopButtonText = if (alarmQState.isActive) {
                     "STOP"
                 } else {
                     "START"
@@ -102,7 +108,9 @@ fun AlarmQComposable(
         },
         onItemAdd = {
             if (edit.value) {
-                viewModel.editInterval(editIndex.value, text.value.toInt())
+                viewModel.editInterval(intervalListState[editIndex.value].copy(
+                    duration = text.value.toInt()
+                ))
                 edit.value = false
             } else {
                 viewModel.addInterval(text.value.toInt())

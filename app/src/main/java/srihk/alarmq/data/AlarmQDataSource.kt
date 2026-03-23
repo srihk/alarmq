@@ -9,9 +9,13 @@ interface AlarmQDataSource {
     val intervalListFlow: Flow<List<Interval>>
     suspend fun saveAlarmQState(state: AlarmQState)
 
-    suspend fun insertInterval(interval: Interval)
+    suspend fun insertInterval(duration: Int)
 
     suspend fun updateInterval(interval: Interval)
 
     suspend fun deleteInterval(interval: Interval)
+
+    suspend fun getCurrentAlarmQState(): AlarmQState
+
+    suspend fun getCurrentIntervalListState(): List<Interval>
 }

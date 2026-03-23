@@ -24,13 +24,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val stateFlow = viewModel.uiState
+        val alarmQStateFlow = viewModel.alarmQStateFlow
+        val intervalLitStateFlow = viewModel.intervalListStateFlow
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
                     modifier = Modifier.fillMaxSize(),
                     onStart = {
-                        if (stateFlow.value.intervalQueueContents.isEmpty()) {
+                        if (intervalLitStateFlow.value.isEmpty()) {
                             messageDisplayer.showLong("Add at least one snooze item in the queue.")
                         }
                         else {
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),0)
                             } else {
-                                if (stateFlow.value.isActive) { /* Stop */
+                                if (alarmQStateFlow.value.isActive) { /* Stop */
                                     viewModel.stopAlarmQ()
                                 } else { /* Start */
                                     viewModel.startAlarmQ()

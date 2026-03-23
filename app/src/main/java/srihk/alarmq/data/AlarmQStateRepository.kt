@@ -1,63 +1,45 @@
 package srihk.alarmq.data
 
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 class AlarmQStateRepository(
     private val alarmQDataSource: AlarmQDataSource
 ) {
-    val stateFlow: StateFlow<AlarmQState> = alarmQDataSource.stateFlow
+    val alarmQFlow: Flow<AlarmQState> = alarmQDataSource.alarmQFlow
+    val intervalListFlow = alarmQDataSource.intervalListFlow
 
-    fun deleteIntervalAtIndex(id: Int) {
-        val state = stateFlow.value
+    suspend fun getCurrentAlarmQState(): AlarmQState {
+        return alarmQDataSource.getCurrentAlarmQState()
+    }
+
+    suspend fun getCurrentIntervalListState(): List<Interval> {
+        return alarmQDataSource.getCurrentIntervalListState()
+    }
+
+    suspend fun deleteInterval(interval: Interval) {
+        alarmQDataSource.deleteInterval(interval)
+    }
+
+    suspend fun addInterval(duration: Int) {
+        alarmQDataSource.insertInterval(duration)
+    }
+
+    suspend fun editInterval(interval: Interval) {
+        alarmQDataSource.updateInterval(interval)
+    }
+
+    suspend fun setActiveInterval(currentInterval: Int, nextAlarmScheduledTime: Long) {
         alarmQDataSource.saveAlarmQState(
-            state.copy(
-                intervalQueueContents = state.intervalQueueContents.filterIndexed { index, _ -> index != id }
-            )
+            AlarmQState(true, currentInterval, nextAlarmScheduledTime)
         )
     }
 
-    fun addInterval(intervalDuration: Int) {
-        val state = stateFlow.value
+    suspend fun resetState() {
         alarmQDataSource.saveAlarmQState(
-            state.copy(
-                intervalQueueContents = state.intervalQueueContents.plus(intervalDuration)
-            )
-        )
-    }
-
-    fun editInterval(id: Int, newIntervalDuration: Int) {
-        val state = stateFlow.value
-        alarmQDataSource.saveAlarmQState(
-            state.copy(
-                intervalQueueContents = state.intervalQueueContents.mapIndexed { index, value ->
-                    if (index == id) {
-                        newIntervalDuration
-                    } else {
-                        value
-                    }
-                }
-            )
-        )
-    }
-
-    fun setActiveInterval(currentInterval: Int, nextAlarmScheduledTime: String) {
-        val state = stateFlow.value
-        alarmQDataSource.saveAlarmQState(
-            state.copy(
-                isActive = true,
-                currentInterval = currentInterval,
-                nextAlarmScheduledTime = nextAlarmScheduledTime
-            )
-        )
-    }
-
-    fun resetState() {
-        val state = stateFlow.value
-        alarmQDataSource.saveAlarmQState(
-            state.copy(
+            AlarmQState(
                 isActive = false,
                 currentInterval = null,
-                nextAlarmScheduledTime = null
+                nextAlarmTime = null
             )
         )
     }

@@ -13,11 +13,20 @@ interface AlarmQDao {
     @Query("SELECT * FROM intervals ORDER BY orderIndex")
     fun getIntervals(): Flow<List<IntervalEntity>>
 
+    @Query("SELECT * FROM intervals ORDER BY orderIndex")
+    suspend fun getIntervalsOnce(): List<IntervalEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIntervals(intervals: List<IntervalEntity>)
 
-    @Insert
-    suspend fun insertInterval(interval: IntervalEntity)
+    @Query("""
+        INSERT INTO intervals (duration, orderIndex)
+        VALUES (
+            :duration,
+            (SELECT COALESCE(MAX(orderIndex), -1) + 1 FROM intervals)
+        )
+    """)
+    suspend fun insertInterval(duration: Int)
 
     @Update
     suspend fun updateInterval(interval: IntervalEntity)
@@ -30,6 +39,9 @@ interface AlarmQDao {
 
     @Query("SELECT * FROM alarm_state WHERE id = 0")
     fun getAlarmQState(): Flow<AlarmQStateEntity?>
+
+    @Query("SELECT * FROM alarm_state WHERE id = 0")
+    suspend fun getAlarmQStateOnce(): AlarmQStateEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setAlarmQState(state: AlarmQStateEntity)

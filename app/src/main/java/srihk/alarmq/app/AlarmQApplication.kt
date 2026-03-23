@@ -1,10 +1,12 @@
 package srihk.alarmq.app
 
 import android.app.Application
-import srihk.alarmq.domain.AlarmQEditor
+import androidx.room.Room
 import srihk.alarmq.domain.AlarmQManager
 import srihk.alarmq.alarm.AlarmRinger
 import srihk.alarmq.alarm.AlarmScheduler
+import srihk.alarmq.data.AlarmQDao
+import srihk.alarmq.data.AlarmQDatabase
 import srihk.alarmq.infrastructure.AndroidAlarmScheduler
 import srihk.alarmq.infrastructure.AndroidRingtoneAlarmRinger
 import srihk.alarmq.feedback.MessageDisplayer
@@ -27,14 +29,21 @@ class AlarmQApplication : Application() {
     lateinit var alarmQManager: AlarmQManager
         private set
 
-    lateinit var alarmQEditor: AlarmQEditor
-        private set
+    val database by lazy {
+        Room.databaseBuilder<AlarmQDatabase>(
+            this,
+            "alarmq_db"
+        ).build()
+    }
+
+    val alarmQDao: AlarmQDao by lazy {
+        database.alarmQDao()
+    }
 
     override fun onCreate() {
         super.onCreate()
-
-        messageDisplayer = ToastMessageDisplayer(applicationContext)
-        val localAlarmQDataSource = LocalAlarmQDataSource(this)
+        messageDisplayer = ToastMessageDisplayer(this)
+        val localAlarmQDataSource = LocalAlarmQDataSource(alarmQDao)
         alarmQStateRepository = AlarmQStateRepository(localAlarmQDataSource)
         alarmRinger = AndroidRingtoneAlarmRinger(this)
         alarmScheduler = AndroidAlarmScheduler(this)
@@ -43,9 +52,6 @@ class AlarmQApplication : Application() {
             alarmQStateRepository,
             messageDisplayer,
             alarmRinger
-        )
-        alarmQEditor = AlarmQEditor(
-            alarmQStateRepository
         )
     }
 }
