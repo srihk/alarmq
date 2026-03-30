@@ -21,11 +21,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import srihk.alarmq.R
-import srihk.alarmq.app.Constants.NOTIFICATION_ID
 import srihk.alarmq.app.AlarmQApplication
 import srihk.alarmq.app.Constants
+import srihk.alarmq.app.Constants.NOTIFICATION_ID
 import srihk.alarmq.receivers.NotificationActionReceiver
+import srihk.alarmq.ui.AlarmActivity
 import srihk.alarmq.ui.MainActivity
+
 
 class RingtoneService : Service() {
     private var alarmRingtone: Ringtone? = null
@@ -127,6 +129,16 @@ class RingtoneService : Service() {
             PendingIntent.FLAG_IMMUTABLE + PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val activityIntent = Intent(context, AlarmActivity::class.java)
+        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            activityIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val openIntent = Intent(context, MainActivity::class.java)
             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val openPendingIntent = PendingIntent.getActivity(
@@ -143,6 +155,7 @@ class RingtoneService : Service() {
             .addAction(R.drawable.ic_launcher_background, Constants.NEXT, snoozePendingIntent)
             .addAction(R.drawable.ic_launcher_foreground, Constants.STOP, stopPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setFullScreenIntent(fullScreenPendingIntent, true)
             .setOngoing(true)
 
         return builder.build()
