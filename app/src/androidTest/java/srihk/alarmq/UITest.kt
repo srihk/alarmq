@@ -15,7 +15,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import srihk.alarmq.infrastructure.Preferences
 import srihk.alarmq.ui.AlarmQComposable
 import srihk.alarmq.ui.InputDialog
 import srihk.alarmq.ui.MINUTES_TEXT_FIELD_TAG
