@@ -20,7 +20,7 @@ class AlarmQManager(
         }
 
         val time: Long = System.currentTimeMillis() + intervalListState[currentInterval].duration * 60000
-        if (!alarmScheduler.scheduleAlarm(time)) {
+        if (!alarmScheduler.scheduleAlarm(time, intervalListState[currentInterval].ringtoneUri)) {
             messageDisplayer.showLong("Couldn't schedule alarm.")
             return
         }

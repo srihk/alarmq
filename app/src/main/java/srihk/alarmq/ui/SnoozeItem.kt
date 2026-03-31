@@ -10,11 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import srihk.alarmq.data.Interval
 
 @Composable
 fun SnoozeItem(
     name: String,
-    item: Int,
+    item: Interval,
     showDelete: Boolean,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
@@ -33,7 +34,7 @@ fun SnoozeItem(
                     style = MaterialTheme.typography.headlineLarge
                 )
                 Text(
-                    text = "$item minutes",
+                    text = "${item.duration} minutes",
                     modifier = Modifier
                         .padding(8.dp)
                         .weight(1f)

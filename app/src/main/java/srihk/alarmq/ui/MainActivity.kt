@@ -1,23 +1,50 @@
 package srihk.alarmq.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import srihk.alarmq.app.AlarmQApplication
+import srihk.alarmq.data.Interval
 import srihk.alarmq.ui.theme.AlarmQTheme
 
 class MainActivity : ComponentActivity() {
     private val messageDisplayer by lazy {
         (application as AlarmQApplication).messageDisplayer
+    }
+
+    private val ringtonePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+        resultHandler(result)
+    }
+
+    private var pendingInterval: Interval? = null
+
+    fun resultHandler(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            val uri: Uri? = result.data
+                ?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+            val interval = pendingInterval
+            if (interval != null && uri != null) {
+                viewModel.editInterval(interval.copy(
+                    ringtoneUri = uri
+                ))
+            }
+        }
     }
 
     private val viewModel: AlarmQViewModel by viewModels { AlarmQViewModel.Factory }
@@ -26,6 +53,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val alarmQStateFlow = viewModel.alarmQStateFlow
         val intervalLitStateFlow = viewModel.intervalListStateFlow
+
+        fun openRingtonePicker(interval: Interval) {
+            val defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
+
+            val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+                putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Alarm Tone")
+                putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, interval.ringtoneUri?:defaultUri)
+                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+            }
+
+            pendingInterval = interval
+            ringtonePickerLauncher.launch(intent)
+        }
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
@@ -49,6 +91,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
+                    },
+                    openRingtonePicker = { interval ->
+                        openRingtonePicker(interval)
                     }
                 )
             }
@@ -62,7 +107,7 @@ fun DefaultPreview() {
     AlarmQTheme {
         SnoozeItem(
             name = "hi",
-            item = 23,
+            item = Interval(0, 0, 0, "".toUri()),
             false,
             {},
             {},

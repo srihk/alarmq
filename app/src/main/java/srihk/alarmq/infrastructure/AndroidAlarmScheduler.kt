@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import srihk.alarmq.alarm.AlarmScheduler
 import srihk.alarmq.app.AlarmQApplication
@@ -15,7 +16,7 @@ class AndroidAlarmScheduler(private val context: Context) : AlarmScheduler {
     var messageDisplayer: MessageDisplayer = (context.applicationContext as AlarmQApplication).messageDisplayer
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    override fun scheduleAlarm(time: Long): Boolean {
+    override fun scheduleAlarm(time: Long, uri: Uri?): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
                 messageDisplayer.showLong("Please give AlarmQ the permission 'Allow setting alarms and remainders'.")
@@ -25,6 +26,10 @@ class AndroidAlarmScheduler(private val context: Context) : AlarmScheduler {
 
         val intent = Intent(context, AlarmReceiver::class.java)
             .putExtra("time", time)
+
+        if (uri != null)
+            intent.putExtra("uri", uri.toString())
+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             0,

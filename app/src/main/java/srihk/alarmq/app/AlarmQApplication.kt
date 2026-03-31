@@ -31,9 +31,9 @@ class AlarmQApplication : Application() {
 
     val database by lazy {
         Room.databaseBuilder<AlarmQDatabase>(
-            this,
-            "alarmq_db"
-        ).build()
+                this,
+                "alarmq_db"
+            ).fallbackToDestructiveMigration(false).build()
     }
 
     val alarmQDao: AlarmQDao by lazy {

@@ -19,6 +19,7 @@ fun InputDialog(
     text: String,
     enableAdd: Boolean,
     onDismiss: () -> Unit,
+    openRingtonePicker: () -> Unit,
     onValueChange: (it: String) -> Unit,
     onItemAdd: () -> Unit
 ) {
@@ -42,6 +43,12 @@ fun InputDialog(
                         "ADD"
                     }
                     Text(text = updateText)
+                }
+                Button(
+                    enabled = true,
+                    onClick = openRingtonePicker
+                ) {
+                    Text("Ringtone")
                 }
             },
             text = {

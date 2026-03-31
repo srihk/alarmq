@@ -11,11 +11,13 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.Ringtone
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,13 +48,6 @@ class RingtoneService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        alarmRingtone = RingtoneManager.getRingtone(
-            this,
-            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        )
-
-        mediaPlayer = MediaPlayer.create(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-
         if (alarmRingtone == null) {
             messageDisplayer.showLong("Please set a default Alarm Ringtone.")
             // TODO: Facilitate the user to set default alarm.
@@ -80,6 +75,21 @@ class RingtoneService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         handler.postDelayed(timeout, 5 * 60000)
+        val uri: Uri = intent?.getStringExtra("uri")?.toUri()
+            ?: RingtoneManager.getActualDefaultRingtoneUri(
+                this,
+                RingtoneManager.TYPE_ALARM
+            )
+
+        alarmRingtone = RingtoneManager.getRingtone(
+            this,
+            uri
+        )
+
+        mediaPlayer = MediaPlayer.create(
+            this,
+            uri
+        )
         messageDisplayer.showShort("Alarm Ringing!")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

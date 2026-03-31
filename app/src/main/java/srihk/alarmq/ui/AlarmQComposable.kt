@@ -13,12 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import srihk.alarmq.data.Interval
 import java.text.SimpleDateFormat
 
 @Composable
 fun AlarmQComposable(
     modifier: Modifier = Modifier,
     onStart: () -> Unit,
+    openRingtonePicker: (Interval) -> Unit,
     viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory)
 ) {
     val alarmQState by viewModel.alarmQStateFlow.collectAsStateWithLifecycle()
@@ -37,7 +39,7 @@ fun AlarmQComposable(
                 itemsIndexed(items = intervalListState) { index, interval ->
                     SnoozeItem(
                         name = interval.order.toString(),
-                        item = interval.duration,
+                        item = interval,
                         showDelete = !alarmQState.isActive,
                         onDelete = {
                             viewModel.deleteInterval(interval)
@@ -116,6 +118,9 @@ fun AlarmQComposable(
                 viewModel.addInterval(text.value.toInt())
             }
             enableAdd.value = false
+        },
+        openRingtonePicker = {
+            openRingtonePicker(intervalListState[editIndex.value])
         },
         onValueChange = {
             val itVal = it.toIntOrNull()
