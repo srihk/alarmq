@@ -139,7 +139,7 @@ class RingtoneService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val openIntent = Intent(context, MainActivity::class.java)
+        val openIntent = Intent(context, AlarmActivity::class.java)
             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val openPendingIntent = PendingIntent.getActivity(
             context,
