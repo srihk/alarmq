@@ -13,11 +13,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.net.toUri
 import srihk.alarmq.app.AlarmQApplication
 import srihk.alarmq.data.Interval
 import srihk.alarmq.ui.theme.AlarmQTheme
@@ -70,14 +66,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val alarmQStateFlow = viewModel.alarmQStateFlow
-        val intervalLitStateFlow = viewModel.intervalListStateFlow
+        val intervalListStateFlow = viewModel.intervalListStateFlow
 
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
                     modifier = Modifier.fillMaxSize(),
                     onStart = {
-                        if (intervalLitStateFlow.value.isEmpty()) {
+                        if (intervalListStateFlow.value.isEmpty()) {
                             messageDisplayer.showLong("Add at least one snooze item in the queue.")
                         }
                         else {
