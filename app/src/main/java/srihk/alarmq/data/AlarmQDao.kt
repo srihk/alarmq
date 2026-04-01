@@ -10,21 +10,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AlarmQDao {
-    @Query("SELECT * FROM intervals ORDER BY orderIndex")
+    @Query("SELECT * FROM intervals ORDER BY id")
     fun getIntervals(): Flow<List<IntervalEntity>>
 
-    @Query("SELECT * FROM intervals ORDER BY orderIndex")
+    @Query("SELECT * FROM intervals ORDER BY id")
     suspend fun getIntervalsOnce(): List<IntervalEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIntervals(intervals: List<IntervalEntity>)
 
     @Query("""
-        INSERT INTO intervals (duration, orderIndex)
-        VALUES (
-            :duration,
-            (SELECT COALESCE(MAX(orderIndex), -1) + 1 FROM intervals)
-        )
+        INSERT INTO intervals (duration)
+        VALUES (:duration)
     """)
     suspend fun insertInterval(duration: Int)
 

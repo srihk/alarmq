@@ -7,6 +7,5 @@ import androidx.room.PrimaryKey
 data class IntervalEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val duration: Int,
-    val orderIndex: Int,
     val ringtoneUri: String?
 )

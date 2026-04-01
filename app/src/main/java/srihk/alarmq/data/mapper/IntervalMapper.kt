@@ -8,7 +8,6 @@ fun IntervalEntity.toDomain(): Interval {
     return Interval(
         id = id,
         duration = duration,
-        order = orderIndex,
         ringtoneUri = ringtoneUri?.toUri()
     )
 }
@@ -17,7 +16,6 @@ fun Interval.toEntity(): IntervalEntity {
     return IntervalEntity(
         id = id,
         duration = duration,
-        orderIndex = order,
         ringtoneUri = ringtoneUri?.toString()
     )
 }

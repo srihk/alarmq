@@ -38,6 +38,7 @@ fun AlarmQComposable(
             LazyColumn(Modifier.weight(1f)) {
                 itemsIndexed(items = intervalListState) { index, interval ->
                     IntervalItem(
+                        itemIndex = index,
                         item = interval,
                         showDelete = !alarmQState.isActive,
                         onDelete = {
@@ -78,8 +79,8 @@ fun AlarmQComposable(
             if (alarmQState.isActive) {
                 Text("Next Alarm: ${
                     SimpleDateFormat
-                    .getDateTimeInstance()
-                    .format(alarmQState.nextAlarmTime)
+                        .getDateTimeInstance()
+                        .format(alarmQState.nextAlarmTime)
                 }")
             }
             Button(

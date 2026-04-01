@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [AlarmQStateEntity::class, IntervalEntity::class],
-    version = 3
+    version = 4
 )
 abstract class AlarmQDatabase : RoomDatabase() {
     abstract fun alarmQDao(): AlarmQDao
