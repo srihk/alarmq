@@ -46,7 +46,7 @@ fun AlarmQComposable(
                         },
                         onEdit = {
                             if (!alarmQState.isActive) {
-                                text.value = intervalListState[index].duration.toString()
+                                text.value = interval.duration.toString()
                                 show.value = true
                                 edit.value = true
                                 editIndex.value = index
