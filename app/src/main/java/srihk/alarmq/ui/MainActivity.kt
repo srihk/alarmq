@@ -100,20 +100,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-@Preview(showBackground = true, widthDp = 540)
-@Composable
-fun DefaultPreview() {
-    AlarmQTheme {
-        IntervalItem(
-            name = "hi",
-            item = Interval(0, 0, 0, "".toUri()),
-            false,
-            {},
-            {},
-            MaterialTheme.colorScheme.primary
-        )
-//        InputDialog(true, {})
-//        AlarmQComposable()
-    }
-}

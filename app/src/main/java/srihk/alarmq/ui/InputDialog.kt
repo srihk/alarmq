@@ -1,5 +1,6 @@
 package srihk.alarmq.ui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -27,9 +28,6 @@ fun InputDialog(
         AlertDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
-                Button(onClick = onDismiss) {
-                    Text(text = "CANCEL")
-                }
                 Button(
                     enabled = enableAdd,
                     onClick = {
@@ -44,22 +42,29 @@ fun InputDialog(
                     }
                     Text(text = updateText)
                 }
-                Button(
-                    enabled = true,
-                    onClick = openRingtonePicker
-                ) {
-                    Text("Ringtone")
+            },
+            dismissButton = {
+                Button(onClick = onDismiss) {
+                    Text(text = "CANCEL")
                 }
             },
             text = {
-                OutlinedTextField(
-                    value = text,
-                    modifier = Modifier.testTag(MINUTES_TEXT_FIELD_TAG),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                    label = { Text("Minutes") },
-                    onValueChange = onValueChange
-                )
+                Column {
+                    OutlinedTextField(
+                        value = text,
+                        modifier = Modifier.testTag(MINUTES_TEXT_FIELD_TAG),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        label = { Text("Minutes") },
+                        onValueChange = onValueChange
+                    )
+                    Button(
+                        enabled = true,
+                        onClick = openRingtonePicker
+                    ) {
+                        Text("Ringtone")
+                    }
+                }
             }
         )
     }
