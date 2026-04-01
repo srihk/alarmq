@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import srihk.alarmq.data.Interval
 
 @Composable
-fun SnoozeItem(
+fun IntervalItem(
     name: String,
     item: Interval,
     showDelete: Boolean,

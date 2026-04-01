@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DefaultPreview() {
     AlarmQTheme {
-        SnoozeItem(
+        IntervalItem(
             name = "hi",
             item = Interval(0, 0, 0, "".toUri()),
             false,
