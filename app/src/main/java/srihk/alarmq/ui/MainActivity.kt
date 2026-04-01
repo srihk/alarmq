@@ -47,6 +47,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun openRingtonePicker(interval: Interval) {
+        val defaultUri = RingtoneManager.getActualDefaultRingtoneUri(
+            this,
+            RingtoneManager.TYPE_ALARM
+        )
+
+        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Alarm Tone")
+            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, interval.ringtoneUri?:defaultUri)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+        }
+
+        pendingInterval = interval
+        ringtonePickerLauncher.launch(intent)
+    }
+
     private val viewModel: AlarmQViewModel by viewModels { AlarmQViewModel.Factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,20 +72,6 @@ class MainActivity : ComponentActivity() {
         val alarmQStateFlow = viewModel.alarmQStateFlow
         val intervalLitStateFlow = viewModel.intervalListStateFlow
 
-        fun openRingtonePicker(interval: Interval) {
-            val defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
-
-            val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-                putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
-                putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Alarm Tone")
-                putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, interval.ringtoneUri?:defaultUri)
-                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
-                putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
-            }
-
-            pendingInterval = interval
-            ringtonePickerLauncher.launch(intent)
-        }
         setContent {
             AlarmQTheme {
                 AlarmQComposable(
