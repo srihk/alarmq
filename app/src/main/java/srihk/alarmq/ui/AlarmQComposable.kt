@@ -38,7 +38,6 @@ fun AlarmQComposable(
             LazyColumn(Modifier.weight(1f)) {
                 itemsIndexed(items = intervalListState) { index, interval ->
                     IntervalItem(
-                        name = interval.order.toString(),
                         item = interval,
                         showDelete = !alarmQState.isActive,
                         onDelete = {

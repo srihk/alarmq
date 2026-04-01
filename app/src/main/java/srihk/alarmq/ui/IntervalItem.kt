@@ -14,7 +14,6 @@ import srihk.alarmq.data.Interval
 
 @Composable
 fun IntervalItem(
-    name: String,
     item: Interval,
     showDelete: Boolean,
     onDelete: () -> Unit,
@@ -29,7 +28,7 @@ fun IntervalItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "#$name",
+                    text = "#${item.order}",
                     modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.headlineLarge
                 )
