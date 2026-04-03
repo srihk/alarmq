@@ -27,8 +27,8 @@ class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource
         )
     }
 
-    override suspend fun insertInterval(duration: Int) {
-        alarmQDao.insertInterval(duration)
+    override suspend fun insertInterval(interval: Interval) {
+        alarmQDao.insertInterval(interval.toEntity())
     }
 
     override suspend fun deleteInterval(interval: Interval) {

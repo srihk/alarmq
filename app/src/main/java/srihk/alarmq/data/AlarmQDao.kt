@@ -19,11 +19,8 @@ interface AlarmQDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIntervals(intervals: List<IntervalEntity>)
 
-    @Query("""
-        INSERT INTO intervals (duration)
-        VALUES (:duration)
-    """)
-    suspend fun insertInterval(duration: Int)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertInterval(interval: IntervalEntity)
 
     @Update
     suspend fun updateInterval(interval: IntervalEntity)

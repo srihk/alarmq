@@ -1,13 +1,16 @@
 package srihk.alarmq.ui
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import srihk.alarmq.domain.AlarmQManager
@@ -28,6 +31,9 @@ class AlarmQViewModel(
             initialValue = AlarmQState()
         )
 
+    private val _editInterval: MutableStateFlow<Interval?> = MutableStateFlow(null)
+    val editInterval: StateFlow<Interval?> = _editInterval.asStateFlow()
+
     val intervalListStateFlow = alarmQStateRepository.intervalListFlow
         .stateIn(
             scope = viewModelScope,
@@ -41,9 +47,9 @@ class AlarmQViewModel(
         }
     }
 
-    fun addInterval(intervalDuration: Int) {
+    fun addInterval(newInterval: Interval) {
         viewModelScope.launch {
-            alarmQStateRepository.addInterval(intervalDuration)
+            alarmQStateRepository.addInterval(newInterval)
         }
     }
 
@@ -63,6 +69,32 @@ class AlarmQViewModel(
         viewModelScope.launch {
             alarmQManager.stop()
         }
+    }
+
+    fun setRingtoneUri(uri: Uri) {
+        val editedInterval = editInterval.value
+        if (editedInterval == null) {
+            _editInterval.value = Interval(duration = 0, ringtoneUri = uri)
+        } else {
+            _editInterval.value = editedInterval.copy(
+                ringtoneUri = uri
+            )
+        }
+    }
+
+    fun setDuration(duration: Int) {
+        val editedInterval = editInterval.value
+        if (editedInterval == null) {
+            _editInterval.value = Interval(duration = duration, ringtoneUri = null)
+        } else {
+            _editInterval.value = editedInterval.copy(
+                duration = duration
+            )
+        }
+    }
+
+    fun setEditInterval(interval: Interval?) {
+        _editInterval.value = interval
     }
 
     companion object : ViewModelProvider.Factory {

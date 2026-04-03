@@ -28,17 +28,12 @@ class MainActivity : ComponentActivity() {
         resultHandler(result)
     }
 
-    private var pendingInterval: Interval? = null
-
     fun resultHandler(result: ActivityResult) {
         if (result.resultCode == RESULT_OK) {
             val uri: Uri? = result.data
                 ?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-            val interval = pendingInterval
-            if (interval != null && uri != null) {
-                viewModel.editInterval(interval.copy(
-                    ringtoneUri = uri
-                ))
+            if (uri != null) {
+                viewModel.setRingtoneUri(uri)
             }
         }
     }
@@ -57,7 +52,6 @@ class MainActivity : ComponentActivity() {
             putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
         }
 
-        pendingInterval = interval
         ringtonePickerLauncher.launch(intent)
     }
 

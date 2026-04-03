@@ -1,5 +1,6 @@
 package srihk.alarmq.ui
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +31,7 @@ fun AlarmQComposable(
     val text = rememberSaveable { mutableStateOf("") }
     val editIndex = rememberSaveable { mutableStateOf(0) }
     val enableAdd = rememberSaveable {mutableStateOf(false) }
+    val editInterval =
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.background
@@ -50,6 +52,7 @@ fun AlarmQComposable(
                                 show.value = true
                                 edit.value = true
                                 editIndex.value = index
+                                viewModel.setEditInterval(interval)
                             }
                         },
                         color = if (alarmQState.isActive && index == alarmQState.currentInterval) {
@@ -65,6 +68,7 @@ fun AlarmQComposable(
                             onClick = {
                                 show.value = true
                                 text.value = ""
+                                viewModel.setEditInterval(null)
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -109,22 +113,25 @@ fun AlarmQComposable(
             text.value = ""
         },
         onItemAdd = {
-            if (edit.value) {
-                viewModel.editInterval(intervalListState[editIndex.value].copy(
-                    duration = text.value.toInt()
-                ))
-                edit.value = false
-            } else {
-                viewModel.addInterval(text.value.toInt())
+            val editedInterval = viewModel.editInterval.value
+            if (editedInterval != null) {
+                if (edit.value) {
+                    viewModel.editInterval(editedInterval)
+                    edit.value = false
+                } else {
+                    viewModel.addInterval(editedInterval)
+                }
             }
             enableAdd.value = false
         },
         openRingtonePicker = {
             openRingtonePicker(intervalListState[editIndex.value])
+            enableAdd.value = (((viewModel.editInterval.value?.duration ?: 0) > 0))
         },
         onValueChange = {
             val itVal = it.toIntOrNull()
             if (itVal != null && itVal >= 0 || it == "") {
+                viewModel.setDuration(itVal?:0)
                 text.value = it
             }
 

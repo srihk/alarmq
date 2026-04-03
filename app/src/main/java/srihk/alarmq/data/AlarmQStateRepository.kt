@@ -20,8 +20,8 @@ class AlarmQStateRepository(
         alarmQDataSource.deleteInterval(interval)
     }
 
-    suspend fun addInterval(duration: Int) {
-        alarmQDataSource.insertInterval(duration)
+    suspend fun addInterval(interval: Interval) {
+        alarmQDataSource.insertInterval(interval)
     }
 
     suspend fun editInterval(interval: Interval) {
