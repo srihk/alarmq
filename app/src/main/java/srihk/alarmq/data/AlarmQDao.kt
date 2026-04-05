@@ -39,4 +39,13 @@ interface AlarmQDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setAlarmQState(state: AlarmQStateEntity)
+
+    @Query("SELECT * FROM settings WHERE id = 0")
+    fun getSettingsFlow(): Flow<Settings?>
+
+    @Query("SELECT * FROM settings WHERE id = 0")
+    suspend fun getSettingsOnce(): Settings?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(settings: Settings)
 }

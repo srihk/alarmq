@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import srihk.alarmq.app.AlarmQApplication
 import srihk.alarmq.data.Interval
 import srihk.alarmq.ui.theme.AlarmQTheme
@@ -28,6 +29,28 @@ class MainActivity : ComponentActivity() {
         resultHandler(result)
     }
 
+    private val defaultRingtonePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+        defaultRingtoneResultHandler(result)
+    }
+
+    fun getRingtoneName(uri: Uri?): String {
+        val defaultUri = viewModel.settingsStateFlow.value?.defaultRingtoneUri?.toUri()?:
+        RingtoneManager.getActualDefaultRingtoneUri(
+            this,
+            RingtoneManager.TYPE_ALARM
+        )
+
+        if (uri == null && defaultUri == null) return "Unknown"
+
+        return try {
+            val ringtone = RingtoneManager.getRingtone(this, uri?:defaultUri)
+            ringtone?.getTitle(this) ?: "Unknown"
+        } catch (e: Exception) {
+            "Unknown"
+        }
+    }
+
     fun resultHandler(result: ActivityResult) {
         if (result.resultCode == RESULT_OK) {
             val uri: Uri? = result.data
@@ -38,8 +61,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun defaultRingtoneResultHandler(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            val uri: Uri? = result.data
+                ?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+            viewModel.setDefaultRingtone(uri)
+        }
+    }
+
     fun openRingtonePicker(interval: Interval) {
-        val defaultUri = RingtoneManager.getActualDefaultRingtoneUri(
+        val defaultUri = viewModel.settingsStateFlow.value?.defaultRingtoneUri?.toUri()?:
+        RingtoneManager.getActualDefaultRingtoneUri(
             this,
             RingtoneManager.TYPE_ALARM
         )
@@ -53,6 +85,24 @@ class MainActivity : ComponentActivity() {
         }
 
         ringtonePickerLauncher.launch(intent)
+    }
+
+    fun openDefaultRingtonePicker() {
+        val defaultUri = viewModel.settingsStateFlow.value?.defaultRingtoneUri?.toUri()?:
+        RingtoneManager.getActualDefaultRingtoneUri(
+            this,
+            RingtoneManager.TYPE_ALARM
+        )
+
+        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Alarm Tone")
+            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, defaultUri)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+        }
+
+        defaultRingtonePickerLauncher.launch(intent)
     }
 
     private val viewModel: AlarmQViewModel by viewModels { AlarmQViewModel.Factory }
@@ -88,7 +138,11 @@ class MainActivity : ComponentActivity() {
                     },
                     openRingtonePicker = { interval ->
                         openRingtonePicker(interval)
-                    }
+                    },
+                    openDefaultRingtonePicker = {
+                        openDefaultRingtonePicker()
+                    },
+                    getRingtoneName = this::getRingtoneName
                 )
             }
         }

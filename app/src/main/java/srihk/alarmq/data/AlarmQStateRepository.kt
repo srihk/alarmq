@@ -1,5 +1,6 @@
 package srihk.alarmq.data
 
+import android.net.Uri
 import kotlinx.coroutines.flow.Flow
 
 class AlarmQStateRepository(
@@ -7,6 +8,8 @@ class AlarmQStateRepository(
 ) {
     val alarmQFlow: Flow<AlarmQState> = alarmQDataSource.alarmQFlow
     val intervalListFlow = alarmQDataSource.intervalListFlow
+
+    val settingsFlow = alarmQDataSource.settingsFlow
 
     suspend fun getCurrentAlarmQState(): AlarmQState {
         return alarmQDataSource.getCurrentAlarmQState()
@@ -42,5 +45,13 @@ class AlarmQStateRepository(
                 nextAlarmTime = null
             )
         )
+    }
+
+    suspend fun setDefaultRingtone(uri: Uri?) {
+        alarmQDataSource.setDefaultRingtone(uri)
+    }
+
+    suspend fun getDefaultRingtone(): Uri? {
+        return alarmQDataSource.getDefaultRingtone()
     }
 }

@@ -1,5 +1,6 @@
 package srihk.alarmq.ui
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -10,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import srihk.alarmq.data.Interval
 
 const val MINUTES_TEXT_FIELD_TAG = "MinutesTextFieldTag"
 
@@ -22,7 +25,9 @@ fun InputDialog(
     onDismiss: () -> Unit,
     openRingtonePicker: () -> Unit,
     onValueChange: (it: String) -> Unit,
-    onItemAdd: () -> Unit
+    onItemAdd: () -> Unit,
+    editInterval: Interval?,
+    getRingtoneName: (Uri?) -> String
 ) {
     if (show) {
         AlertDialog(
@@ -62,7 +67,11 @@ fun InputDialog(
                         enabled = true,
                         onClick = openRingtonePicker
                     ) {
-                        Text("Ringtone")
+                        Text(
+                            text = "Ringtone: ${getRingtoneName(editInterval?.ringtoneUri)}",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }

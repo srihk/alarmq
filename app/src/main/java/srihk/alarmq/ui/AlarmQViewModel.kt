@@ -34,6 +34,13 @@ class AlarmQViewModel(
     private val _editInterval: MutableStateFlow<Interval?> = MutableStateFlow(null)
     val editInterval: StateFlow<Interval?> = _editInterval.asStateFlow()
 
+    val settingsStateFlow = alarmQStateRepository.settingsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
     val intervalListStateFlow = alarmQStateRepository.intervalListFlow
         .stateIn(
             scope = viewModelScope,
@@ -50,6 +57,12 @@ class AlarmQViewModel(
     fun addInterval(newInterval: Interval) {
         viewModelScope.launch {
             alarmQStateRepository.addInterval(newInterval)
+        }
+    }
+
+    fun setDefaultRingtone(uri: Uri?) {
+        viewModelScope.launch {
+            alarmQStateRepository.setDefaultRingtone(uri)
         }
     }
 

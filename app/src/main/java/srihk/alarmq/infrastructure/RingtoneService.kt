@@ -48,11 +48,6 @@ class RingtoneService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        if (alarmRingtone == null) {
-            messageDisplayer.showLong("Please set a default Alarm Ringtone.")
-            // TODO: Facilitate the user to set default alarm.
-        }
-
         val notificationManager: NotificationManager = this.getSystemService(NOTIFICATION_SERVICE)
                 as NotificationManager
 

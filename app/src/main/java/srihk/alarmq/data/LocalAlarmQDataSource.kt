@@ -1,5 +1,7 @@
 package srihk.alarmq.data
 
+import android.net.Uri
+import androidx.core.net.toUri
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import srihk.alarmq.data.mapper.toDomain
@@ -16,6 +18,10 @@ class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource
         .map { intervalEntities ->
             intervalEntities.map { intervalEntity -> intervalEntity.toDomain() }
         }
+
+    override val settingsFlow: Flow<Settings?> = alarmQDao.getSettingsFlow().map {
+        settings -> settings
+    }
 
     override suspend fun saveAlarmQState(state: AlarmQState) {
         alarmQDao.setAlarmQState(
@@ -47,5 +53,13 @@ class LocalAlarmQDataSource(private val alarmQDao: AlarmQDao) : AlarmQDataSource
         return alarmQDao.getIntervalsOnce().map { intervalEntity ->
             intervalEntity.toDomain()
         }
+    }
+
+    override suspend fun setDefaultRingtone(uri: Uri?) {
+        alarmQDao.upsert(Settings(id = 0, defaultRingtoneUri = uri?.toString()))
+    }
+
+    override suspend fun getDefaultRingtone(): Uri? {
+        return alarmQDao.getSettingsOnce()?.defaultRingtoneUri?.toUri()
     }
 }

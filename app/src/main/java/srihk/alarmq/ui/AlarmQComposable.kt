@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import srihk.alarmq.data.Interval
@@ -22,16 +24,20 @@ fun AlarmQComposable(
     modifier: Modifier = Modifier,
     onStart: () -> Unit,
     openRingtonePicker: (Interval) -> Unit,
+    openDefaultRingtonePicker: () -> Unit,
+    getRingtoneName: (Uri?) -> String,
     viewModel: AlarmQViewModel = viewModel(factory = AlarmQViewModel.Factory)
 ) {
     val alarmQState by viewModel.alarmQStateFlow.collectAsStateWithLifecycle()
     val intervalListState by viewModel.intervalListStateFlow.collectAsStateWithLifecycle()
+    val settings by viewModel.settingsStateFlow.collectAsStateWithLifecycle()
+    val editInterval by viewModel.editInterval.collectAsStateWithLifecycle()
     val show = rememberSaveable { mutableStateOf(false) }
     val edit = rememberSaveable { mutableStateOf(false) }
     val text = rememberSaveable { mutableStateOf("") }
     val editIndex = rememberSaveable { mutableStateOf(0) }
     val enableAdd = rememberSaveable {mutableStateOf(false) }
-    val editInterval =
+
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.background
@@ -59,7 +65,8 @@ fun AlarmQComposable(
                             MaterialTheme.colorScheme.primary
                         } else {
                             MaterialTheme.colorScheme.background
-                        }
+                        },
+                        getRingtoneName = getRingtoneName
                     )
                 }
                 if (!alarmQState.isActive) {
@@ -86,6 +93,14 @@ fun AlarmQComposable(
                         .getDateTimeInstance()
                         .format(alarmQState.nextAlarmTime)
                 }")
+            } else {
+                Button(onClick = { openDefaultRingtonePicker() }, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Default Ringtone: ${getRingtoneName(settings?.defaultRingtoneUri?.toUri())}",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             Button(
                 onClick = onStart,
@@ -136,5 +151,8 @@ fun AlarmQComposable(
             }
 
             enableAdd.value = !(text.value == "" || text.value.toInt() == 0)
-        })
+        },
+        editInterval = editInterval,
+        getRingtoneName = getRingtoneName
+    )
 }
