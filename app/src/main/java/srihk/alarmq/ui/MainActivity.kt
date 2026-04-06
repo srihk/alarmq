@@ -1,12 +1,15 @@
 package srihk.alarmq.ui
 
 import android.Manifest
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -117,6 +120,15 @@ class MainActivity : ComponentActivity() {
                 AlarmQComposable(
                     modifier = Modifier.fillMaxSize(),
                     onStart = {
+                        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            val canShowFullScreen = notificationManager.canUseFullScreenIntent()
+                            if (!canShowFullScreen) {
+                                // Direct user to settings
+                                val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                                startActivity(intent)
+                            }
+                        }
                         if (intervalListStateFlow.value.isEmpty()) {
                             messageDisplayer.showLong("Add at least one snooze item in the queue.")
                         }

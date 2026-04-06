@@ -4,8 +4,10 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import srihk.alarmq.alarm.AlarmScheduler
 import srihk.alarmq.app.AlarmQApplication
 import srihk.alarmq.feedback.MessageDisplayer
@@ -20,6 +22,9 @@ class AndroidAlarmScheduler(private val context: Context) : AlarmScheduler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
                 messageDisplayer.showLong("Please give AlarmQ the permission 'Allow setting alarms and remainders'.")
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
                 return false
             }
         }
